@@ -1,0 +1,57 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Player {
+  id       String  @id @default(cuid())
+  name     String
+  number   Int?
+  position String?
+  parentId String
+
+  teamId String?
+  team   Team? @relation(fields: [teamId], references: [id])
+
+  attendances Attendance[]
+}
+
+model Session {
+  id       String   @id @default(cuid())
+  title    String
+  opponent String
+  type     String
+  location String
+  date     DateTime
+  time     String
+  kit      String?
+
+  attendances Attendance[]
+}
+
+model Team {
+  id   String @id @default(cuid())
+  name String
+
+  players Player[]
+}
+
+model Attendance {
+  id        String   @id @default(cuid())
+
+  playerId  String
+  sessionId String
+  status    String   // YES | NO | MAYBE
+
+  player    Player   @relation(fields: [playerId], references: [id])
+  session   Session  @relation(fields: [sessionId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([playerId, sessionId])
+}
+
