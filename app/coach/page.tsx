@@ -91,9 +91,9 @@ export default function CoachPage() {
             Add Tournament
           </div>
 
-          <div className="bg-blue-600 text-white px-8 py-4 rounded-xl shadow font-semibold">
+          {/* <div className="bg-blue-600 text-white px-8 py-4 rounded-xl shadow font-semibold">
             Share Website
-          </div>
+          </div> */}
         </div>
 
         {/* UPCOMING FIXTURES */}
