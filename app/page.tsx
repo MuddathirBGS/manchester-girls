@@ -1,8 +1,11 @@
 import Link from "next/link";
 import AttendanceButtons from "@/app/components/AttendanceButtons";
 
+const baseUrl =
+  process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
 async function getSessions() {
-  const res = await fetch("http://localhost:3000/api/sessions", {
+  const res = await fetch(`${baseUrl}/api/sessions`, {
     cache: "no-store",
   });
 
@@ -17,7 +20,7 @@ async function getSessions() {
 }
 
 async function getPlayers() {
-  const res = await fetch("http://localhost:3000/api/players", {
+  const res = await fetch(`${baseUrl}/api/players`, {
     cache: "no-store",
   });
 
