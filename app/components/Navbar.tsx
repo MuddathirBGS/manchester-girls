@@ -113,10 +113,10 @@ export default function Navbar() {
 
               <div className="border-t border-white/20 my-2" />
 
-              <button className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-gradient-to-r from-pink-500 to-rose-600 font-semibold shadow hover:scale-[1.02] transition">
+              {/* <button className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-gradient-to-r from-pink-500 to-rose-600 font-semibold shadow hover:scale-[1.02] transition">
                 <span>Add Something</span>
                 <span>＋</span>
-              </button>
+              </button> */}
 
               <button className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-black/40 font-semibold hover:bg-black/60 transition">
                 <span>Logout</span>
