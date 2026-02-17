@@ -9,6 +9,10 @@ export async function GET(req: Request) {
   const players = await prisma.player.findMany({
     where: teamId ? { teamId } : {},
     orderBy: { name: "asc" },
+    include: {
+      stats: true,
+      awardVotes: true,
+    },
   });
 
   return NextResponse.json(players);
@@ -49,6 +53,10 @@ export async function POST(req: Request) {
         position: body.position || null,
         teamId: body.teamId,
         parentId: body.parentId,
+      },
+      include: {
+        stats: true,
+        awardVotes: true,
       },
     });
 
