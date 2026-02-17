@@ -1,26 +1,38 @@
 import prisma from "@/lib/prisma";
 
-export async function getStatLeaders(teamId: string) {
+export async function getLeaders(teamId: string) {
   const players = await prisma.player.findMany({
     where: { teamId },
     include: { stats: true },
   });
 
-  let topGoals = null;
-  let topAssists = null;
-  let topSaves = null;
+  let topGoals: any = null;
+  let topAssists: any = null;
+  let topSaves: any = null;
 
   for (const p of players) {
     if (!p.stats) continue;
 
-    if (!topGoals || p.stats.goals > topGoals.stats.goals)
+    if (
+      !topGoals ||
+      (p.stats?.goals || 0) > (topGoals.stats?.goals || 0)
+    ) {
       topGoals = p;
+    }
 
-    if (!topAssists || p.stats.assists > topAssists.stats.assists)
+    if (
+      !topAssists ||
+      (p.stats?.assists || 0) > (topAssists.stats?.assists || 0)
+    ) {
       topAssists = p;
+    }
 
-    if (!topSaves || p.stats.saves > topSaves.stats.saves)
+    if (
+      !topSaves ||
+      (p.stats?.saves || 0) > (topSaves.stats?.saves || 0)
+    ) {
       topSaves = p;
+    }
   }
 
   return {
