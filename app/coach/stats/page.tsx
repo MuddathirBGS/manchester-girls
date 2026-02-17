@@ -18,26 +18,26 @@ export default async function StatsPage({
   });
 
   const totalGoals = players.reduce(
-    (sum, p) => sum + (p.stats?.[0]?.goals || 0),
+    (sum, p) => sum + (p.stats?.goals || 0),
     0
   );
 
   const totalAssists = players.reduce(
-    (sum, p) => sum + (p.stats?.[0]?.assists || 0),
+    (sum, p) => sum + (p.stats?.assists || 0),
     0
   );
 
   const totalSaves = players.reduce(
-    (sum, p) => sum + (p.stats?.[0]?.saves || 0),
+    (sum, p) => sum + (p.stats?.saves || 0),
     0
   );
 
   const topScorer = [...players].sort(
-    (a, b) => (b.stats?.[0]?.goals || 0) - (a.stats?.[0]?.goals || 0)
+    (a, b) => (b.stats?.goals || 0) - (a.stats?.goals || 0)
   )[0];
 
   const topSaver = [...players].sort(
-    (a, b) => (b.stats?.[0]?.saves || 0) - (a.stats?.[0]?.saves || 0)
+    (a, b) => (b.stats?.saves || 0) - (a.stats?.saves || 0)
   )[0];
 
   return (
@@ -149,7 +149,7 @@ export default async function StatsPage({
           </div>
 
           {players.map((p) => {
-            const s = p.stats?.[0];
+            const s = p.stats;
 
             return (
               <div
