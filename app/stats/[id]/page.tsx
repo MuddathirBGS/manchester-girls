@@ -23,11 +23,11 @@ export default async function PlayerStatsPage({ params }: Props) {
   if (!player) return notFound();
 
   // Use existing stats or default
-  const stat = player.stats?.[0] || {
-    goals: 0,
-    assists: 0,
-    saves: 0,
-  };
+ const stat = player.stats || {
+  goals: 0,
+  assists: 0,
+  saves: 0,
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-pink-200 via-pink-100 to-white p-8">
