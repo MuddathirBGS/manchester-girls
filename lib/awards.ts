@@ -1,39 +1,45 @@
+import prisma from "@/lib/prisma";
+
 export async function getPlayerOfMonth(teamId: string) {
   const players = await prisma.player.findMany({
     where: { teamId },
     include: {
       stats: true,
-      attendances: true,
       awardVotes: true,
     },
   });
 
-  let winner = null;
-  let topScore = 0;
+  const score = (p: any) =>
+    (p.stats?.goals || 0) * 5 +
+    (p.stats?.assists || 0) * 3 +
+    (p.stats?.saves || 0) * 2 +
+    (p.awardVotes?.length || 0) * 4;
 
-  for (const p of players) {
-    const goals = p.stats?.goals || 0;
-    const assists = p.stats?.assists || 0;
-    const saves = p.stats?.saves || 0;
+  return [...players].sort((a, b) => score(b) - score(a))[0] || null;
+}
 
-    const statScore =
-      goals * 5 +
-      assists * 3 +
-      saves * 2;
+export async function getGoldenBoot(teamId: string) {
+  const players = await prisma.player.findMany({
+    where: { teamId },
+    include: { stats: true },
+  });
 
-    const coachVotes = p.awardVotes.filter(v => v.type === "COACH").length;
-    const parentVotes = p.awardVotes.filter(v => v.type === "PARENT").length;
+  return (
+    [...players].sort(
+      (a, b) => (b.stats?.goals || 0) - (a.stats?.goals || 0)
+    )[0] || null
+  );
+}
 
-    const total =
-      statScore +
-      coachVotes * 25 +
-      parentVotes * 10;
+export async function getTopSaver(teamId: string) {
+  const players = await prisma.player.findMany({
+    where: { teamId },
+    include: { stats: true },
+  });
 
-    if (total > topScore) {
-      topScore = total;
-      winner = p;
-    }
-  }
-
-  return winner;
+  return (
+    [...players].sort(
+      (a, b) => (b.stats?.saves || 0) - (a.stats?.saves || 0)
+    )[0] || null
+  );
 }
