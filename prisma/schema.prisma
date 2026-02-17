@@ -8,16 +8,16 @@ datasource db {
 }
 
 model Player {
-  id          String       @id @default(cuid())
-  name        String
-  number      Int?
-  position    String?
-  parentId    String?
-  teamId      String?
-  loginCode   String?
+  id        String  @id @default(cuid())
+  name      String
+  number    Int?
+  position  String?
+  parentId  String?
+  teamId    String?
+  loginCode String?
 
-  parent      Parent?      @relation(fields: [parentId], references: [id])
-  team        Team?        @relation(fields: [teamId], references: [id])
+  parent Parent? @relation(fields: [parentId], references: [id])
+  team   Team?   @relation(fields: [teamId], references: [id])
 
   attendances Attendance[]
   stats       Stat?
@@ -29,8 +29,8 @@ model Player {
 }
 
 model Team {
-  id          String    @id @default(cuid())
-  name        String    @unique
+  id   String @id @default(cuid())
+  name String @unique
 
   players     Player[]
   sessions    Session[]
@@ -40,16 +40,16 @@ model Team {
 }
 
 model Session {
-  id          String       @id @default(cuid())
-  title       String
-  opponent    String
-  type        String
-  location    String
-  date        DateTime
-  time        String
-  kit         String?
-  poster      String?
-  teamId      String
+  id       String   @id @default(cuid())
+  title    String
+  opponent String
+  type     String
+  location String
+  date     DateTime
+  time     String
+  kit      String?
+  poster   String?
+  teamId   String
 
   team        Team         @relation(fields: [teamId], references: [id])
   attendances Attendance[]
@@ -67,7 +67,7 @@ model Tournament {
   notes     String?
   createdAt DateTime @default(now())
 
-  team      Team @relation(fields: [teamId], references: [id])
+  team Team @relation(fields: [teamId], references: [id])
 }
 
 model Attendance {
@@ -77,16 +77,16 @@ model Attendance {
   status    String
   createdAt DateTime @default(now())
 
-  player    Player   @relation(fields: [playerId], references: [id])
-  session   Session  @relation(fields: [sessionId], references: [id])
+  player  Player  @relation(fields: [playerId], references: [id])
+  session Session @relation(fields: [sessionId], references: [id])
 
   @@unique([playerId, sessionId])
 }
 
 model Parent {
-  id      String   @id @default(cuid())
-  name    String
-  email   String   @unique
+  id    String @id @default(cuid())
+  name  String
+  email String @unique
 
   players Player[]
 }
@@ -99,18 +99,18 @@ model Feedback {
   improve   String?
   createdAt DateTime @default(now())
 
-  player    Player   @relation(fields: [playerId], references: [id])
+  player Player @relation(fields: [playerId], references: [id])
 }
 
 model Stat {
   id       String @id @default(cuid())
   playerId String @unique
 
-  goals    Int    @default(0)
-  assists  Int    @default(0)
-  saves    Int    @default(0)
+  goals   Int @default(0)
+  assists Int @default(0)
+  saves   Int @default(0)
 
-  player   Player @relation(fields: [playerId], references: [id])
+  player Player @relation(fields: [playerId], references: [id])
 }
 
 model AwardVote {
@@ -118,10 +118,11 @@ model AwardVote {
   playerId  String
   teamId    String
   type      String
-  coachId   String?   // NEW
+  coachId   String?
   createdAt DateTime @default(now())
 
   player Player @relation(fields: [playerId], references: [id])
+  team   Team   @relation(fields: [teamId], references: [id]) // ⭐ ADD THIS
 
   @@index([createdAt])
 }
@@ -129,10 +130,10 @@ model AwardVote {
 model Award {
   id        String   @id @default(cuid())
   playerId  String
-  type      String   // "POTM" | "GOLDEN_BOOT" | etc
+  type      String // "POTM" | "GOLDEN_BOOT" | etc
   createdAt DateTime @default(now())
 
-  player    Player   @relation(fields: [playerId], references: [id])
+  player Player @relation(fields: [playerId], references: [id])
 }
 
 model CoachAward {
@@ -141,6 +142,6 @@ model CoachAward {
   teamId    String
   createdAt DateTime @default(now())
 
-  player    Player   @relation(fields: [playerId], references: [id])
-  team      Team     @relation(fields: [teamId], references: [id])
+  player Player @relation(fields: [playerId], references: [id])
+  team   Team   @relation(fields: [teamId], references: [id])
 }
