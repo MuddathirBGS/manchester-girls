@@ -1,10 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function AddFixturePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const teamIdFromUrl = searchParams.get("teamId");
+
+  const [teamName, setTeamName] = useState("Loading...");
+  const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
     teamId: "",
@@ -18,7 +23,27 @@ export default function AddFixturePage() {
     notes: "",
   });
 
-  const [loading, setLoading] = useState(false);
+  // Set teamId from URL
+  useEffect(() => {
+    if (teamIdFromUrl) {
+      setForm((prev) => ({ ...prev, teamId: teamIdFromUrl }));
+    }
+  }, [teamIdFromUrl]);
+
+  // 🔥 Fetch team name from DB
+  useEffect(() => {
+    const loadTeam = async () => {
+      if (!teamIdFromUrl) return;
+
+      const res = await fetch(`/api/teams`);
+      const teams = await res.json();
+
+      const team = teams.find((t: any) => t.id === teamIdFromUrl);
+      if (team) setTeamName(team.name);
+    };
+
+    loadTeam();
+  }, [teamIdFromUrl]);
 
   const update = (key: string, value: string) => {
     setForm({ ...form, [key]: value });
@@ -50,8 +75,8 @@ export default function AddFixturePage() {
 
     if (res.ok) {
       alert("Fixture added successfully!");
-      router.push("/coach");   // go back to coach page
-      router.refresh();        // refresh data
+      router.push("/coach");
+      router.refresh();
     } else {
       alert("Error adding fixture");
     }
@@ -59,8 +84,7 @@ export default function AddFixturePage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-black/40">
-      <div className="bg-white w-[420px] rounded-xl shadow-xl p-6 relative">
-
+      <div className="bg-white w-[420px] rounded-xl shadow-xl p-6">
         <h2 className="text-xl font-bold mb-4">Add Fixture</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -68,15 +92,11 @@ export default function AddFixturePage() {
           {/* TEAM */}
           <div>
             <label className="text-sm font-semibold">Team</label>
-            <select
-              className="w-full border rounded-lg p-2 mt-1"
-              onChange={(e) => update("teamId", e.target.value)}
-              required
-            >
-              <option value="">Select a team</option>
-              <option value="dynos">Dynos</option>
-              <option value="divas">Divas</option>
-            </select>
+            <input
+              value={teamName}
+              disabled
+              className="w-full border rounded-lg p-2 mt-1 bg-gray-100"
+            />
           </div>
 
           {/* TYPE */}
@@ -126,7 +146,7 @@ export default function AddFixturePage() {
             />
           </div>
 
-          {/* DATE */}
+          {/* DATE + TIME */}
           <div className="flex gap-2">
             <div className="flex-1">
               <label className="text-sm font-semibold">Date</label>
@@ -170,7 +190,6 @@ export default function AddFixturePage() {
             />
           </div>
 
-          {/* BUTTONS */}
           <div className="flex justify-end gap-3 pt-3">
             <button
               type="button"

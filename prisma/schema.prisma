@@ -1,57 +1,146 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
 model Player {
-  id       String  @id @default(cuid())
-  name     String
-  number   Int?
-  position String?
-  parentId String
+  id          String       @id @default(cuid())
+  name        String
+  number      Int?
+  position    String?
+  parentId    String?
+  teamId      String?
+  loginCode   String?
 
-  teamId String?
-  team   Team? @relation(fields: [teamId], references: [id])
-
-  attendances Attendance[]
-}
-
-model Session {
-  id       String   @id @default(cuid())
-  title    String
-  opponent String
-  type     String
-  location String
-  date     DateTime
-  time     String
-  kit      String?
+  parent      Parent?      @relation(fields: [parentId], references: [id])
+  team        Team?        @relation(fields: [teamId], references: [id])
 
   attendances Attendance[]
+  stats       Stat?
+
+  awards      Award[]
+  awardVotes  AwardVote[]
+  coachAwards CoachAward[]
+  feedbacks   Feedback[]
 }
 
 model Team {
-  id   String @id @default(cuid())
-  name String
+  id          String    @id @default(cuid())
+  name        String    @unique
 
-  players Player[]
+  players     Player[]
+  sessions    Session[]
+  tournaments Tournament[]
+  awardVotes  AwardVote[]
+  coachAwards CoachAward[]
+}
+
+model Session {
+  id          String       @id @default(cuid())
+  title       String
+  opponent    String
+  type        String
+  location    String
+  date        DateTime
+  time        String
+  kit         String?
+  poster      String?
+  teamId      String
+
+  team        Team         @relation(fields: [teamId], references: [id])
+  attendances Attendance[]
+}
+
+model Tournament {
+  id        String   @id @default(cuid())
+  title     String
+  teamId    String
+  date      DateTime
+  location  String
+  meetTime  String?
+  kit       String?
+  poster    String?
+  notes     String?
+  createdAt DateTime @default(now())
+
+  team      Team @relation(fields: [teamId], references: [id])
 }
 
 model Attendance {
   id        String   @id @default(cuid())
-
   playerId  String
   sessionId String
-  status    String   // YES | NO | MAYBE
+  status    String
+  createdAt DateTime @default(now())
 
   player    Player   @relation(fields: [playerId], references: [id])
   session   Session  @relation(fields: [sessionId], references: [id])
 
-  createdAt DateTime @default(now())
-
   @@unique([playerId, sessionId])
 }
 
+model Parent {
+  id      String   @id @default(cuid())
+  name    String
+  email   String   @unique
+
+  players Player[]
+}
+
+model Feedback {
+  id        String   @id @default(cuid())
+  playerId  String
+  coachNote String?
+  strengths String?
+  improve   String?
+  createdAt DateTime @default(now())
+
+  player    Player   @relation(fields: [playerId], references: [id])
+}
+
+model Stat {
+  id       String @id @default(cuid())
+  playerId String @unique
+
+  goals    Int    @default(0)
+  assists  Int    @default(0)
+  saves    Int    @default(0)
+
+  player   Player @relation(fields: [playerId], references: [id])
+}
+
+model AwardVote {
+  id        String   @id @default(cuid())
+  playerId  String
+  teamId    String
+  type      String
+  coachId   String?   // NEW
+  createdAt DateTime @default(now())
+
+  player Player @relation(fields: [playerId], references: [id])
+
+  @@index([createdAt])
+}
+
+model Award {
+  id        String   @id @default(cuid())
+  playerId  String
+  type      String   // "POTM" | "GOLDEN_BOOT" | etc
+  createdAt DateTime @default(now())
+
+  player    Player   @relation(fields: [playerId], references: [id])
+}
+
+model CoachAward {
+  id        String   @id @default(cuid())
+  playerId  String
+  teamId    String
+  createdAt DateTime @default(now())
+
+  player    Player   @relation(fields: [playerId], references: [id])
+  team      Team     @relation(fields: [teamId], references: [id])
+}

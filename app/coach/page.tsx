@@ -3,12 +3,31 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
+import AddParentDialog from "../components/dialogs/AddParentDialog";
+import AddPlayerDialog from "../components/dialogs/AddPlayerDialog";
+import AddFixtureDialog from "../components/dialogs/AddFixtureDialog";
+import AddTrainingDialog from "../components/dialogs/AddTrainingDialog";
+import AddtournamentDialog from "../components/dialogs/AddtournamentDialog";
+
 export default function CoachPage() {
+  const DYNOS_ID = "cmlp8lhno00004lay76ixxb2n";
+  const DIVAS_ID = "cmlp8lji200014lays2jfga30";
+
   const [fixtures, setFixtures] = useState<any[]>([]);
   const [training, setTraining] = useState<any[]>([]);
+  const [players, setPlayers] = useState<any[]>([]);
+  const [teamId, setTeamId] = useState<string>(DYNOS_ID);
+
+  const [showParent, setShowParent] = useState(false);
+  const [showPlayer, setShowPlayer] = useState(false);
+  const [showFixture, setShowFixture] = useState(false);
+  const [showTraining, setShowTraining] = useState(false);
+  const [showTournament, setShowTournament] = useState(false);
 
   useEffect(() => {
-    fetch("/api/sessions")
+    if (!teamId) return;
+
+    fetch(`/api/sessions?teamId=${teamId}`)
       .then((res) => res.json())
       .then((data) => {
         const sorted = data.sort(
@@ -19,90 +38,186 @@ export default function CoachPage() {
         setFixtures(sorted.filter((s: any) => s.type !== "TRAINING"));
         setTraining(sorted.filter((s: any) => s.type === "TRAINING"));
       });
-  }, []);
+
+    fetch(`/api/players?teamId=${teamId}`)
+      .then((res) => res.json())
+      .then((data) => setPlayers(data));
+  }, [teamId]);
 
   const upcomingFixture = fixtures.slice(0, 3);
   const upcomingTraining = training.slice(0, 3);
 
+  const kitColor = (kit: string) => {
+    if (!kit) return "bg-gray-300 text-gray-800";
+    const k = kit.toLowerCase();
+    if (k === "pink") return "bg-pink-600 text-white";
+    if (k === "black") return "bg-black text-white";
+    if (k === "white") return "bg-gray-200 text-gray-900";
+    return "bg-pink-500 text-white";
+  };
+
+  const score = (p: any) =>
+    (p.stats?.goals || 0) * 5 +
+    (p.stats?.assists || 0) * 3 +
+    (p.stats?.saves || 0) * 2;
+
+  const teamPlayers = players.filter((p: any) => p.teamId === teamId);
+
+  const playerOfMonth = [...teamPlayers].sort(
+    (a, b) => score(b) - score(a)
+  )[0];
+
+  const goldenBoot = [...teamPlayers].sort(
+    (a, b) => (b.stats?.goals || 0) - (a.stats?.goals || 0)
+  )[0];
+
+  const coachLeader = [...teamPlayers].sort(
+    (a, b) =>
+      (b.awardVotes?.filter((v: any) => v.type === "COACH").length || 0) -
+      (a.awardVotes?.filter((v: any) => v.type === "COACH").length || 0)
+  )[0];
+
   return (
-    <div className="min-h-screen bg-gradient-to-r from-pink-200 via-pink-100 to-white p-8">
+    <div className="min-h-screen bg-gradient-to-br from-white via-pink-50 to-rose-100 p-4 md:p-10">
       <div className="max-w-6xl mx-auto">
 
-        {/* TOP ROW */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold">Select Team</h1>
+        {/* HEADER */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-10">
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-black">
+            Coach Dashboard
+          </h1>
 
-          <div className="flex flex-wrap gap-3">
-            <button className="px-4 py-2 bg-green-100 border border-green-400 text-green-700 rounded-lg font-semibold">
-              ⚡ Live Stats
-            </button>
-            <button className="px-4 py-2 bg-white border rounded-lg font-semibold">
-              Player Codes
-            </button>
-            <button className="px-4 py-2 bg-white border rounded-lg font-semibold">
-              Attendance
-            </button>
-            <button className="px-4 py-2 bg-white border rounded-lg font-semibold">
-              Statistics
-            </button>
-
-            <Link href="/roster">
-              <button className="px-4 py-2 bg-white border rounded-lg font-semibold">
-                Team Roster
+          <div className="flex flex-wrap gap-2">
+            <Link href="/coach/live-stats">
+              <button className="px-4 py-2 bg-white border rounded-lg font-semibold shadow-sm hover:shadow transition">
+                ⚡ Live Stats
               </button>
             </Link>
 
-            <button className="px-4 py-2 bg-white border rounded-lg font-semibold">
-              Manage Teams
-            </button>
+            <Link href="/coach/player-codes">
+              <button className="px-4 py-2 bg-white border rounded-lg font-semibold shadow-sm hover:shadow transition">
+                Player Codes
+              </button>
+            </Link>
+
+            <Link href="/attendance">
+              <button className="px-4 py-2 bg-white border rounded-lg font-semibold shadow-sm hover:shadow transition">
+                Attendance
+              </button>
+            </Link>
+
+            <Link href={`/coach/stats?teamId=${teamId}`}>
+              <button className="px-4 py-2 bg-white border rounded-lg font-semibold shadow-sm hover:shadow transition">
+                Statistics
+              </button>
+            </Link>
+
+            <Link href="/roster">
+              <button className="px-4 py-2 bg-white border rounded-lg font-semibold shadow-sm hover:shadow transition">
+                Team Roster
+              </button>
+            </Link>
           </div>
         </div>
 
-        {/* TEAM CARDS */}
-        <div className="flex gap-6 mb-8">
-          <div className="bg-pink-500 text-white p-6 rounded-xl w-64 shadow">
-            <div className="font-bold text-lg">Dynos</div>
+        {/* TEAM SELECTOR */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+          <div
+            onClick={() => setTeamId(DYNOS_ID)}
+            className={`cursor-pointer p-6 rounded-2xl shadow-md border transition-all ${
+              teamId === DYNOS_ID
+                ? "bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-lg"
+                : "bg-white hover:shadow-lg"
+            }`}
+          >
+            <div className="font-bold text-xl">Dynos</div>
             <div className="text-sm opacity-90">U9</div>
-            <div className="text-xs mt-2">Coach: Rick</div>
+            <div className="text-xs mt-2 opacity-80">Coach: Rick</div>
           </div>
 
-          <div className="bg-white border border-pink-300 p-6 rounded-xl w-64 shadow">
-            <div className="font-bold text-lg">Divas</div>
+          <div
+            onClick={() => setTeamId(DIVAS_ID)}
+            className={`cursor-pointer p-6 rounded-2xl shadow-md border transition-all ${
+              teamId === DIVAS_ID
+                ? "bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-lg"
+                : "bg-white hover:shadow-lg"
+            }`}
+          >
+            <div className="font-bold text-xl">Divas</div>
             <div className="text-sm opacity-90">U9</div>
-            <div className="text-xs mt-2">Coach: Kristina</div>
+            <div className="text-xs mt-2 opacity-80">Coach: Kristina</div>
           </div>
         </div>
 
-        {/* ACTION BUTTONS */}
-        <div className="flex gap-6 mb-10">
-          <Link href="/coach/add-fixture">
-            <div className="bg-pink-500 text-white px-8 py-4 rounded-xl shadow font-semibold cursor-pointer">
-              Add Fixture
+        {/* TEAM AWARDS */}
+        {teamPlayers.length > 0 && (
+          <div className="mb-10 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white border rounded-xl p-5 shadow-md">
+              <div className="text-xs text-zinc-500">Player of Month</div>
+              <div className="text-lg font-bold text-pink-600">
+                {playerOfMonth?.name || "—"}
+              </div>
             </div>
-          </Link>
 
-          <Link href="/coach/add-training">
-            <div className="bg-black text-white px-8 py-4 rounded-xl shadow font-semibold cursor-pointer">
-              Add Training
+            <div className="bg-white border rounded-xl p-5 shadow-md">
+              <div className="text-xs text-zinc-500">Top Scorer</div>
+              <div className="text-lg font-bold text-pink-600">
+                {goldenBoot?.name || "—"}
+              </div>
             </div>
-          </Link>
 
-          <div className="bg-purple-600 text-white px-8 py-4 rounded-xl shadow font-semibold">
-            Add Tournament
+            <div className="bg-white border rounded-xl p-5 shadow-md">
+              <div className="text-xs text-zinc-500">Coach Favorite</div>
+              <div className="text-lg font-bold text-pink-600">
+                {coachLeader?.name || "—"}
+              </div>
+            </div>
           </div>
+        )}
 
-          {/* <div className="bg-blue-600 text-white px-8 py-4 rounded-xl shadow font-semibold">
-            Share Website
-          </div> */}
-        </div>
+        {/* ACTION BUTTONS — ALL MATCH ADD FIXTURE */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-12">
+  <button
+    onClick={() => setShowParent(true)}
+    className="bg-gradient-to-r from-pink-500 to-pink-700 text-white p-4 rounded-xl shadow-md font-semibold hover:scale-105 hover:shadow-lg transition"
+  >
+    Add Parent
+  </button>
 
-        {/* UPCOMING FIXTURES */}
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold">Upcoming Fixtures</h2>
-          <Link href="/fixtures">
-            <span className="text-pink-500 text-sm font-semibold cursor-pointer">
-              View All
-            </span>
+  <button
+    onClick={() => setShowPlayer(true)}
+    className="bg-gradient-to-r from-pink-500 to-pink-700 text-white p-4 rounded-xl shadow-md font-semibold hover:scale-105 hover:shadow-lg transition"
+  >
+    Add Player
+  </button>
+
+  <button
+    onClick={() => setShowFixture(true)}
+    className="bg-gradient-to-r from-pink-500 to-pink-700 text-white p-4 rounded-xl shadow-md font-semibold hover:scale-105 hover:shadow-lg transition"
+  >
+    Add Fixture
+  </button>
+
+  <button
+    onClick={() => setShowTraining(true)}
+    className="bg-gradient-to-r from-pink-500 to-pink-700 text-white p-4 rounded-xl shadow-md font-semibold hover:scale-105 hover:shadow-lg transition"
+  >
+    Add Training
+  </button>
+
+  <button
+    onClick={() => setShowTournament(true)}
+    className="bg-gradient-to-r from-pink-500 to-pink-700 text-white p-4 rounded-xl shadow-md font-semibold hover:scale-105 hover:shadow-lg transition"
+  >
+    Add Tournament
+  </button>
+</div>
+
+        {/* FIXTURES */}
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold text-black">Upcoming Fixtures</h2>
+          <Link href="/fixtures" className="text-sm text-pink-600 font-semibold hover:underline">
+            View All
           </Link>
         </div>
 
@@ -110,54 +225,57 @@ export default function CoachPage() {
           <p className="text-zinc-500 mb-8">No fixtures scheduled.</p>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {upcomingFixture.map((s: any) => (
-            <div
-              key={s.id}
-              className="bg-white rounded-xl shadow-md overflow-hidden border border-pink-200"
-            >
-              <div className="h-2 bg-pink-500" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
+          {upcomingFixture.map((s: any) => {
+            const attending =
+              s.attendances?.filter((a: any) => a.status === "YES").length || 0;
 
-              <div className="p-5">
-                <div className="flex justify-between items-center mb-2">
-                  <h2 className="text-lg font-semibold text-zinc-900">
-                    {s.title}
-                  </h2>
+            return (
+              <div key={s.id} className="bg-white rounded-2xl shadow-md border hover:shadow-lg hover:-translate-y-1 transition overflow-hidden">
+                <div className="h-1 bg-gradient-to-r from-pink-600 to-rose-600" />
+                <div className="p-5">
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="font-semibold text-lg text-black">
+                      {s.title}
+                    </h3>
 
-                  {s.kit && (
-                    <span className="bg-pink-500 text-white text-xs px-3 py-1 rounded-full">
-                      {s.kit.toUpperCase()} KIT
-                    </span>
+                    {s.kit && (
+                      <span className={`text-xs px-3 py-1 rounded-full font-bold ${kitColor(s.kit)}`}>
+                        {s.kit.toUpperCase()} KIT
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="text-sm text-zinc-700 mb-1">
+                    📅 {new Date(s.date).toLocaleDateString()} at {s.time}
+                  </div>
+
+                  {s.location && (
+                    <div className="text-sm text-zinc-600 mb-1">
+                      📍 {s.location}
+                    </div>
                   )}
+
+                  {s.meetTime && (
+                    <div className="text-sm text-zinc-600">
+                      ⏰ Meet: {s.meetTime}
+                    </div>
+                  )}
+
+                  <div className="text-sm text-zinc-600 mt-3">
+                    👥 {attending} attending
+                  </div>
                 </div>
-
-                <p className="text-sm text-zinc-600 mb-1">
-                  📅 {new Date(s.date).toLocaleDateString()} at {s.time}
-                </p>
-
-                <p className="text-sm text-zinc-600 mb-1">
-                  📍 {s.location}
-                </p>
-
-                <p className="text-sm text-zinc-600 mb-1">
-                  ⏰ Meet: {s.meetTime || "TBC"}
-                </p>
-
-                <p className="text-sm text-zinc-600 mt-2">
-                  👥 {s.attendances?.filter((a: any) => a.status === "YES").length || 0} attending
-                </p>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
-        {/* UPCOMING TRAINING */}
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold">Upcoming Training</h2>
-          <Link href="/training">
-            <span className="text-black text-sm font-semibold cursor-pointer">
-              View All
-            </span>
+        {/* TRAINING */}
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold text-black">Upcoming Training</h2>
+          <Link href="/training" className="text-sm text-pink-600 font-semibold hover:underline">
+            View All
           </Link>
         </div>
 
@@ -165,38 +283,49 @@ export default function CoachPage() {
           <p className="text-zinc-500">No training scheduled.</p>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {upcomingTraining.map((t: any) => (
-            <div
-              key={t.id}
-              className="bg-white rounded-xl shadow-md overflow-hidden border border-zinc-200"
-            >
-              <div className="h-2 bg-black" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {upcomingTraining.map((t: any) => {
+            const attending =
+              t.attendances?.filter((a: any) => a.status === "YES").length || 0;
 
-              <div className="p-5">
-                <h2 className="text-lg font-semibold text-zinc-900 mb-2">
-                  {t.title}
-                </h2>
+            return (
+              <div key={t.id} className="bg-white rounded-2xl shadow-md border hover:shadow-lg hover:-translate-y-1 transition overflow-hidden">
+                <div className="h-1 bg-gradient-to-r from-black to-black" />
+                <div className="p-5">
+                  <h3 className="font-semibold text-lg text-black mb-3">
+                    {t.title}
+                  </h3>
 
-                <p className="text-sm text-zinc-600 mb-1">
-                  📅 {new Date(t.date).toLocaleDateString()} at {t.time}
-                </p>
+                  <div className="text-sm text-zinc-700 mb-1">
+                    📅 {new Date(t.date).toLocaleDateString()} at {t.time}
+                  </div>
 
-                <p className="text-sm text-zinc-600 mb-1">
-                  📍 {t.location}
-                </p>
+                  {t.location && (
+                    <div className="text-sm text-zinc-600 mb-1">
+                      📍 {t.location}
+                    </div>
+                  )}
 
-                <p className="text-sm text-zinc-600 mb-1">
-                  ⏰ Start: {t.time}
-                </p>
+                  {t.meetTime && (
+                    <div className="text-sm text-zinc-600">
+                      ⏰ Meet: {t.meetTime}
+                    </div>
+                  )}
 
-                <p className="text-sm text-zinc-600 mt-2">
-                  👥 {t.attendances?.filter((a: any) => a.status === "YES").length || 0} attending
-                </p>
+                  <div className="text-sm text-zinc-600 mt-3">
+                    👥 {attending} attending
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
+
+        <AddParentDialog open={showParent} onClose={() => setShowParent(false)} />
+        <AddPlayerDialog open={showPlayer} teamId={teamId} onClose={() => setShowPlayer(false)} />
+        <AddFixtureDialog open={showFixture} teamId={teamId} onClose={() => setShowFixture(false)} />
+        <AddTrainingDialog open={showTraining} teamId={teamId} onClose={() => setShowTraining(false)} />
+        <AddtournamentDialog open={showTournament} teamId={teamId} onClose={() => setShowTournament(false)} />
 
       </div>
     </div>

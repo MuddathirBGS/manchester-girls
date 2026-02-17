@@ -1,5 +1,7 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 export default function AttendanceButtons({
   sessionId,
   playerId,
@@ -7,6 +9,8 @@ export default function AttendanceButtons({
   sessionId: string;
   playerId: string;
 }) {
+  const router = useRouter();
+
   const send = async (status: "YES" | "NO" | "MAYBE") => {
     await fetch("/api/attendance", {
       method: "POST",
@@ -20,7 +24,7 @@ export default function AttendanceButtons({
       }),
     });
 
-    location.reload();
+    router.refresh(); // smoother than reload
   };
 
   return (

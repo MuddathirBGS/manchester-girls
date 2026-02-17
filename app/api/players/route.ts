@@ -2,25 +2,63 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 // GET players
-export async function GET() {
-  const players = await prisma.player.findMany();
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const teamId = searchParams.get("teamId");
+
+  const players = await prisma.player.findMany({
+    where: teamId ? { teamId } : {},
+    orderBy: { name: "asc" },
+  });
 
   return NextResponse.json(players);
 }
 
 // CREATE player
 export async function POST(req: Request) {
-  const body = await req.json();
+  try {
+    const body = await req.json();
 
-  const player = await prisma.player.create({
-    data: {
-      name: body.name,
-      number: body.number,
-      position: body.position,
-      parentId: body.parentId,
-      teamId: body.teamId,   // ✅ correct relation field
-    },
-  });
+    console.log("PLAYER CREATE BODY:", body);
 
-  return NextResponse.json(player);
+    if (!body.name) {
+      return NextResponse.json(
+        { error: "Missing name" },
+        { status: 400 }
+      );
+    }
+
+    if (!body.teamId) {
+      return NextResponse.json(
+        { error: "Missing teamId" },
+        { status: 400 }
+      );
+    }
+
+    if (!body.parentId) {
+      return NextResponse.json(
+        { error: "Missing parentId" },
+        { status: 400 }
+      );
+    }
+
+    const player = await prisma.player.create({
+      data: {
+        name: body.name,
+        number: body.number || null,
+        position: body.position || null,
+        teamId: body.teamId,
+        parentId: body.parentId,
+      },
+    });
+
+    return NextResponse.json(player);
+  } catch (err: any) {
+    console.error("PLAYER CREATE ERROR:", err);
+
+    return NextResponse.json(
+      { error: err.message },
+      { status: 500 }
+    );
+  }
 }

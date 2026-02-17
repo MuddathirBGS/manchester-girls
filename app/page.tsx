@@ -1,41 +1,53 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import AttendanceButtons from "@/app/components/AttendanceButtons";
 
 const baseUrl =
   process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
-async function getSessions() {
-  const res = await fetch(`${baseUrl}/api/sessions`, {
-    cache: "no-store",
-  });
+export default function Home() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  if (!res.ok) return [];
+  const [players, setPlayers] = useState<any[]>([]);
+  const [sessions, setSessions] = useState<any[]>([]);
 
-  const data = await res.json();
+  const selectedIdFromUrl = searchParams.get("playerId");
 
-  return data.sort(
-    (a: any, b: any) =>
-      new Date(a.date).getTime() - new Date(b.date).getTime()
-  );
-}
+  // Load players
+  useEffect(() => {
+    fetch(`${baseUrl}/api/players`)
+      .then((res) => res.json())
+      .then((data) => setPlayers(data));
+  }, []);
 
-async function getPlayers() {
-  const res = await fetch(`${baseUrl}/api/players`, {
-    cache: "no-store",
-  });
+  const selectedPlayer =
+    players.find((p: any) => p.id === selectedIdFromUrl) || players[0];
 
-  if (!res.ok) return [];
-  return res.json();
-}
+  const firstPlayer = selectedPlayer?.id;
+  const teamId = selectedPlayer?.teamId;
 
-export default async function Home() {
-  const sessions = await getSessions();
-  const players = await getPlayers();
+  // Load sessions for selected team
+  useEffect(() => {
+    if (!teamId) return;
 
-  const firstPlayer = players[0]?.id;
+    fetch(`${baseUrl}/api/sessions?teamId=${teamId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        const sorted = data.sort(
+          (a: any, b: any) =>
+            new Date(a.date).getTime() - new Date(b.date).getTime()
+        );
+        setSessions(sorted);
+      });
+  }, [teamId]);
 
-  const allFixtures = sessions.filter((s: any) => s.type !== "TRAINING");
-  const fixtures = allFixtures.slice(0, 3);
+  const fixtures = sessions
+    .filter((s: any) => s.type !== "TRAINING")
+    .slice(0, 3);
 
   const training = sessions
     .filter((s: any) => s.type === "TRAINING")
@@ -56,7 +68,13 @@ export default async function Home() {
           {players.map((p: any) => (
             <div
               key={p.id}
-              className="bg-white rounded-xl shadow-md p-5 w-80 border border-pink-200"
+              onClick={() => router.push(`/?playerId=${p.id}`)}
+              className={`bg-white rounded-xl shadow-md p-5 w-80 border cursor-pointer transition
+                ${
+                  p.id === firstPlayer
+                    ? "border-pink-500 ring-2 ring-pink-300"
+                    : "border-pink-200"
+                }`}
             >
               <div className="flex items-center gap-4">
                 <img
@@ -70,9 +88,13 @@ export default async function Home() {
                 </div>
               </div>
 
-              <button className="mt-4 w-full bg-pink-500 hover:bg-pink-600 text-white py-2 rounded-lg font-semibold">
+              <Link
+                href={`/player/${p.id}`}
+                onClick={(e) => e.stopPropagation()}
+                className="block mt-4 w-full bg-pink-500 hover:bg-pink-600 text-white py-2 rounded-lg font-semibold text-center"
+              >
                 View Profile
-              </button>
+              </Link>
             </div>
           ))}
         </div>
@@ -155,7 +177,10 @@ export default async function Home() {
                 </p>
 
                 <p className="text-sm text-zinc-600 mb-3">
-                  👥 {s.attendances?.filter((a: any) => a.status === "YES").length || 0} attending
+                  👥{" "}
+                  {s.attendances?.filter((a: any) => a.status === "YES")
+                    .length || 0}{" "}
+                  attending
                 </p>
 
                 {firstPlayer && (
@@ -208,7 +233,10 @@ export default async function Home() {
                 </p>
 
                 <p className="text-sm text-zinc-600 mb-3">
-                  👥 {t.attendances?.filter((a: any) => a.status === "YES").length || 0} attending
+                  👥{" "}
+                  {t.attendances?.filter((a: any) => a.status === "YES")
+                    .length || 0}{" "}
+                  attending
                 </p>
 
                 {firstPlayer && (

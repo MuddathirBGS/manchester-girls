@@ -1,12 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function AddTrainingPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const teamIdFromUrl = searchParams.get("teamId");
+
+  // ✅ REAL TEAM IDS
+  const DYNOS_ID = "cmlp8lhno00004lay76ixxb2n";
+  const DIVAS_ID = "cmlp8lji200014lays2jfga30";
 
   const [form, setForm] = useState({
+    teamId: "",
     title: "",
     meetTime: "",
     date: "",
@@ -17,40 +24,47 @@ export default function AddTrainingPage() {
 
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (teamIdFromUrl) {
+      setForm((prev) => ({ ...prev, teamId: teamIdFromUrl }));
+    }
+  }, [teamIdFromUrl]);
+
   const update = (key: string, value: string) => {
     setForm({ ...form, [key]: value });
   };
 
-const handleSubmit = async (e: any) => {
-  e.preventDefault();
-  setLoading(true);
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    setLoading(true);
 
-  const res = await fetch("/api/sessions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      title: form.title,
-      opponent: "",        // not used for training
-      type: "TRAINING",    // 🔥 THIS is the key
-      location: form.location,
-      date: form.date,
-      time: form.time,
-      kit: "",             // not needed
-    }),
-  });
+    const res = await fetch("/api/sessions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: form.title,
+        opponent: "",
+        type: "TRAINING",
+        location: form.location,
+        date: form.date,
+        time: form.time,
+        kit: "",
+        teamId: form.teamId,
+      }),
+    });
 
-  setLoading(false);
+    setLoading(false);
 
-  if (res.ok) {
-    alert("Training added successfully!");
-    router.push("/coach");
-    router.refresh();
-  } else {
-    alert("Error adding training");
-  }
-};
+    if (res.ok) {
+      alert("Training added successfully!");
+      router.push("/coach");
+      router.refresh();
+    } else {
+      alert("Error adding training");
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-black/40">
@@ -60,15 +74,20 @@ const handleSubmit = async (e: any) => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
 
-          {/* TEAM (visual only for now) */}
+          {/* TEAM */}
           <div>
             <label className="text-sm font-semibold">Team</label>
-            <select
-              className="w-full border rounded-lg p-2 mt-1"
-            >
-              <option>Dynos</option>
-              <option>Divas</option>
-            </select>
+            <input
+              value={
+                form.teamId === DYNOS_ID
+                  ? "Dynos"
+                  : form.teamId === DIVAS_ID
+                  ? "Divas"
+                  : "Loading..."
+              }
+              disabled
+              className="w-full border rounded-lg p-2 mt-1 bg-gray-100"
+            />
           </div>
 
           {/* TITLE */}
@@ -82,7 +101,7 @@ const handleSubmit = async (e: any) => {
             />
           </div>
 
-          {/* MEET TIME (not saved yet, UI only) */}
+          {/* MEET TIME */}
           <div>
             <label className="text-sm font-semibold">Meet Time</label>
             <input
@@ -126,7 +145,7 @@ const handleSubmit = async (e: any) => {
             />
           </div>
 
-          {/* NOTES (not saved yet, UI only) */}
+          {/* NOTES */}
           <div>
             <label className="text-sm font-semibold">Notes</label>
             <textarea
@@ -146,10 +165,11 @@ const handleSubmit = async (e: any) => {
               Cancel
             </button>
 
+            {/* 🔥 NOW PINK */}
             <button
               type="submit"
               disabled={loading}
-              className="px-5 py-2 bg-black text-white rounded-lg font-semibold"
+              className="px-5 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-lg font-semibold"
             >
               {loading ? "Saving..." : "Add Training"}
             </button>
