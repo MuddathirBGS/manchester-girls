@@ -51,7 +51,12 @@ export default async function StatsEditor({ params }: Props) {
 
   if (!player) return notFound();
 
-  const stats = player.stats?.[0];
+  // stats is a SINGLE object now, not an array
+  const stat = player.stats || {
+    goals: 0,
+    assists: 0,
+    saves: 0,
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-pink-200 via-pink-100 to-white p-8">
@@ -71,7 +76,7 @@ export default async function StatsEditor({ params }: Props) {
             <input
               name="goals"
               type="number"
-              defaultValue={stats?.goals ?? 0}
+              defaultValue={stat.goals}
               className="w-full border rounded-lg p-2 mt-1"
             />
           </div>
@@ -82,7 +87,7 @@ export default async function StatsEditor({ params }: Props) {
             <input
               name="assists"
               type="number"
-              defaultValue={stats?.assists ?? 0}
+              defaultValue={stat.assists}
               className="w-full border rounded-lg p-2 mt-1"
             />
           </div>
@@ -93,7 +98,7 @@ export default async function StatsEditor({ params }: Props) {
             <input
               name="saves"
               type="number"
-              defaultValue={stats?.saves ?? 0}
+              defaultValue={stat.saves}
               className="w-full border rounded-lg p-2 mt-1"
             />
           </div>
