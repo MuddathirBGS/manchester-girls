@@ -26,6 +26,7 @@ model Player {
   awardVotes  AwardVote[]
   coachAwards CoachAward[]
   feedbacks   Feedback[]
+  events      MatchEvent[]
 }
 
 model Team {
@@ -40,19 +41,38 @@ model Team {
 }
 
 model Session {
-  id       String   @id @default(cuid())
-  title    String
-  opponent String
-  type     String
-  location String
-  date     DateTime
-  time     String
-  kit      String?
-  poster   String?
-  teamId   String
+  id        String   @id @default(cuid())
+  title     String
+  opponent  String
+  type      String
+  location  String
+  date      DateTime
+  time      String
+  kit       String?
+  poster    String?
+  teamId    String
+
+  // 🔥 LIVE MATCH DATA
+  teamScore     Int @default(0)
+  opponentScore Int @default(0)
+  status        String @default("UPCOMING") // UPCOMING | LIVE | FINISHED
 
   team        Team         @relation(fields: [teamId], references: [id])
   attendances Attendance[]
+  events      MatchEvent[]
+}
+
+model MatchEvent {
+  id        String   @id @default(cuid())
+  sessionId String
+  playerId  String?
+  type      String   // GOAL | ASSIST | SAVE | OPPONENT_GOAL
+  value     Int      @default(1) // +1 or -1
+  minute    Int?
+  createdAt DateTime @default(now())
+
+  session Session @relation(fields: [sessionId], references: [id])
+  player  Player? @relation(fields: [playerId], references: [id])
 }
 
 model Tournament {
@@ -122,7 +142,7 @@ model AwardVote {
   createdAt DateTime @default(now())
 
   player Player @relation(fields: [playerId], references: [id])
-  team   Team   @relation(fields: [teamId], references: [id]) // ⭐ ADD THIS
+  team   Team   @relation(fields: [teamId], references: [id])
 
   @@index([createdAt])
 }
@@ -130,7 +150,7 @@ model AwardVote {
 model Award {
   id        String   @id @default(cuid())
   playerId  String
-  type      String // "POTM" | "GOLDEN_BOOT" | etc
+  type      String
   createdAt DateTime @default(now())
 
   player Player @relation(fields: [playerId], references: [id])
