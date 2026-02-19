@@ -20,34 +20,37 @@ export default function CoachSubNav({
   ];
 
   return (
-    <div className="w-full flex justify-center mt-6 mb-2">
+    <div className="w-full flex justify-center mt-6 mb-2 px-3">
       {/* Outer Container */}
-      <div className="bg-white shadow-md border border-pink-100 rounded-2xl px-4 py-2">
-        <div className="flex items-center gap-2">
+      <div className="w-full max-w-6xl">
+        <div className="bg-white shadow-md border border-pink-100 rounded-2xl px-3 py-2 overflow-x-auto">
+          
+          {/* Scroll Container */}
+          <div className="flex items-center gap-2 min-w-max">
 
-          {links.map((link) => {
-            // 👇 Exact match for dashboard, startsWith for others
-            const active =
-              link.match === "/coach"
-                ? pathname === "/coach"
-                : pathname.startsWith(link.match);
+            {links.map((link) => {
+              const active =
+                link.match === "/coach"
+                  ? pathname === "/coach"
+                  : pathname.startsWith(link.match);
 
-            return (
-              <Link
-                key={link.label}
-                href={link.href}
-                className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200
-                  ${
-                    active
-                      ? "bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-md"
-                      : "text-zinc-600 hover:text-pink-600 hover:bg-pink-50"
-                  }`}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
+              return (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className={`px-4 md:px-5 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200
+                    ${
+                      active
+                        ? "bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-md"
+                        : "text-zinc-600 hover:text-pink-600 hover:bg-pink-50"
+                    }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
 
+          </div>
         </div>
       </div>
     </div>
