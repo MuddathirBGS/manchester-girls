@@ -4,17 +4,11 @@ const DYNOS_ID = "cmlp8lhno00004lay76ixxb2n";
 const DIVAS_ID = "cmlp8lji200014lays2jfga30";
 
 async function getData(teamId: string) {
-  // Automatically resolve correct domain (preview or production)
-  const base =
-    process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "http://localhost:3000";
-
   const [playersRes, sessionsRes] = await Promise.all([
-    fetch(`${base}/api/players?teamId=${teamId}`, {
+    fetch(`/api/players?teamId=${teamId}`, {
       cache: "no-store",
     }),
-    fetch(`${base}/api/sessions?teamId=${teamId}`, {
+    fetch(`/api/sessions?teamId=${teamId}`, {
       cache: "no-store",
     }),
   ]);
