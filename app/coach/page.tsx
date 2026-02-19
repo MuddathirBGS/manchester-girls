@@ -18,6 +18,8 @@ export default function CoachPage() {
   const [players, setPlayers] = useState<any[]>([]);
   const [teamId, setTeamId] = useState<string>(DYNOS_ID);
 
+  const [highlighted, setHighlighted] = useState<string | null>(null);
+
   const [showParent, setShowParent] = useState(false);
   const [showPlayer, setShowPlayer] = useState(false);
   const [showFixture, setShowFixture] = useState(false);
@@ -35,8 +37,17 @@ export default function CoachPage() {
             new Date(a.date).getTime() - new Date(b.date).getTime()
         );
 
-        setFixtures(sorted.filter((s: any) => s.type !== "TRAINING"));
-        setTraining(sorted.filter((s: any) => s.type === "TRAINING"));
+        const f = sorted.filter((s: any) => s.type !== "TRAINING");
+        const t = sorted.filter((s: any) => s.type === "TRAINING");
+
+        setFixtures(f);
+        setTraining(t);
+
+        // highlight newest fixture briefly
+        if (f.length > 0) {
+          setHighlighted(f[0].id);
+          setTimeout(() => setHighlighted(null), 3500);
+        }
       });
 
     fetch(`/api/players?teamId=${teamId}`)
@@ -112,11 +123,12 @@ export default function CoachPage() {
               </button>
             </Link>
 
-            <Link href="/roster">
-              <button className="px-4 py-2 bg-white border rounded-lg font-semibold shadow-sm hover:shadow transition">
-                Team Roster
-              </button>
-            </Link>
+           <Link href="/coach/manage-teams">
+  <button className="px-4 py-2 bg-white border rounded-lg font-semibold shadow-sm hover:shadow transition">
+    Team Roster
+  </button>
+</Link>
+
           </div>
         </div>
 
@@ -167,7 +179,7 @@ export default function CoachPage() {
             </div>
 
             <div className="bg-white border rounded-xl p-5 shadow-md">
-              <div className="text-xs text-zinc-500">Coach Favorite</div>
+              <div className="text-xs text-zinc-500">Trainee of the Week</div>
               <div className="text-lg font-bold text-pink-600">
                 {coachLeader?.name || "—"}
               </div>
@@ -175,43 +187,28 @@ export default function CoachPage() {
           </div>
         )}
 
-        {/* ACTION BUTTONS — ALL MATCH ADD FIXTURE */}
+        {/* ACTION BUTTONS */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-12">
-  <button
-    onClick={() => setShowParent(true)}
-    className="bg-gradient-to-r from-pink-500 to-pink-700 text-white p-4 rounded-xl shadow-md font-semibold hover:scale-105 hover:shadow-lg transition"
-  >
-    Add Parent
-  </button>
+          <button onClick={() => setShowParent(true)} className="bg-gradient-to-r from-pink-500 to-pink-700 text-white p-4 rounded-xl shadow-md font-semibold hover:scale-105 hover:shadow-lg transition">
+            Add Parent
+          </button>
 
-  <button
-    onClick={() => setShowPlayer(true)}
-    className="bg-gradient-to-r from-pink-500 to-pink-700 text-white p-4 rounded-xl shadow-md font-semibold hover:scale-105 hover:shadow-lg transition"
-  >
-    Add Player
-  </button>
+          <button onClick={() => setShowPlayer(true)} className="bg-gradient-to-r from-pink-500 to-pink-700 text-white p-4 rounded-xl shadow-md font-semibold hover:scale-105 hover:shadow-lg transition">
+            Add Player
+          </button>
 
-  <button
-    onClick={() => setShowFixture(true)}
-    className="bg-gradient-to-r from-pink-500 to-pink-700 text-white p-4 rounded-xl shadow-md font-semibold hover:scale-105 hover:shadow-lg transition"
-  >
-    Add Fixture
-  </button>
+          <button onClick={() => setShowFixture(true)} className="bg-gradient-to-r from-pink-500 to-pink-700 text-white p-4 rounded-xl shadow-md font-semibold hover:scale-105 hover:shadow-lg transition">
+            Add Fixture
+          </button>
 
-  <button
-    onClick={() => setShowTraining(true)}
-    className="bg-gradient-to-r from-pink-500 to-pink-700 text-white p-4 rounded-xl shadow-md font-semibold hover:scale-105 hover:shadow-lg transition"
-  >
-    Add Training
-  </button>
+          <button onClick={() => setShowTraining(true)} className="bg-gradient-to-r from-pink-500 to-pink-700 text-white p-4 rounded-xl shadow-md font-semibold hover:scale-105 hover:shadow-lg transition">
+            Add Training
+          </button>
 
-  <button
-    onClick={() => setShowTournament(true)}
-    className="bg-gradient-to-r from-pink-500 to-pink-700 text-white p-4 rounded-xl shadow-md font-semibold hover:scale-105 hover:shadow-lg transition"
-  >
-    Add Tournament
-  </button>
-</div>
+          <button onClick={() => setShowTournament(true)} className="bg-gradient-to-r from-pink-500 to-pink-700 text-white p-4 rounded-xl shadow-md font-semibold hover:scale-105 hover:shadow-lg transition">
+            Add Tournament
+          </button>
+        </div>
 
         {/* FIXTURES */}
         <div className="flex justify-between items-center mb-4">
@@ -230,8 +227,15 @@ export default function CoachPage() {
             const attending =
               s.attendances?.filter((a: any) => a.status === "YES").length || 0;
 
+            const isNew = highlighted === s.id;
+
             return (
-              <div key={s.id} className="bg-white rounded-2xl shadow-md border hover:shadow-lg hover:-translate-y-1 transition overflow-hidden">
+              <div
+                key={s.id}
+                className={`bg-white rounded-2xl border overflow-hidden transition-all
+                ${isNew ? "shadow-2xl ring-4 ring-pink-400 scale-[1.02]" : "shadow-md"}
+                hover:shadow-lg hover:-translate-y-1`}
+              >
                 <div className="h-1 bg-gradient-to-r from-pink-600 to-rose-600" />
                 <div className="p-5">
                   <div className="flex justify-between items-center mb-3">

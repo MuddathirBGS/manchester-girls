@@ -17,8 +17,9 @@ export default function AddTrainingDialog({
 }) {
   const toast = useToast();
 
-  const DYNOS_ID = "cmlp8lhno00004lay76ixxb2n";
-  const DIVAS_ID = "cmlp8lji200014lays2jfga30";
+  const [teams, setTeams] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const [form, setForm] = useState({
     teamId: "",
@@ -30,15 +31,23 @@ export default function AddTrainingDialog({
     notes: "",
   });
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  // Inject teamId from parent
+  // Load teams for dropdown
   useEffect(() => {
-    if (teamId) {
-      setForm((prev) => ({ ...prev, teamId }));
-    }
-  }, [teamId]);
+    const loadTeams = async () => {
+      const res = await fetch("/api/teams");
+      const data = await res.json();
+      setTeams(data);
+
+      // default selection
+      if (teamId) {
+        setForm((prev) => ({ ...prev, teamId }));
+      } else if (data.length > 0) {
+        setForm((prev) => ({ ...prev, teamId: data[0].id }));
+      }
+    };
+
+    if (open) loadTeams();
+  }, [open, teamId]);
 
   const update = (key: string, value: string) => {
     setForm({ ...form, [key]: value });
@@ -63,7 +72,7 @@ export default function AddTrainingDialog({
         date: form.date,
         time: form.time,
         kit: "",
-        teamId: form.teamId,
+        teamId: form.teamId, // 🔥 goes to selected team
         meetTime: form.meetTime,
         notes: form.notes,
       }),
@@ -113,20 +122,21 @@ export default function AddTrainingDialog({
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* TEAM */}
+        {/* TEAM SELECTOR */}
         <div>
           <label className="text-sm font-semibold">Team</label>
-          <input
-            value={
-              form.teamId === DYNOS_ID
-                ? "Dynos"
-                : form.teamId === DIVAS_ID
-                ? "Divas"
-                : "Loading..."
-            }
-            disabled
-            className="w-full border rounded-lg p-2 mt-1 bg-gray-100"
-          />
+          <select
+            className="w-full border rounded-lg p-2 mt-1"
+            value={form.teamId}
+            onChange={(e) => update("teamId", e.target.value)}
+            required
+          >
+            {teams.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* TITLE */}

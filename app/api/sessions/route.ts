@@ -9,6 +9,10 @@ export async function GET(req: Request) {
     orderBy: { date: "asc" },
     include: {
       attendances: true,
+      team: true,
+
+      // 🆕 include POTM player info (for display later)
+      events: true,
     },
   });
 
@@ -30,6 +34,14 @@ export async function POST(req: Request) {
         time: body.time,
         kit: body.kit,
         teamId: body.teamId,
+
+        // 🆕 NEW FIELDS (safe defaults)
+        meetTime: body.meetTime ?? null,
+        notes: body.notes ?? null,
+        poster: body.poster ?? null,
+        photoUrl: body.photoUrl ?? null,
+        coachPotmId: body.coachPotmId ?? null,
+        parentPotmId: body.parentPotmId ?? null,
       },
     });
 

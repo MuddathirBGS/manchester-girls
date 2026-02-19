@@ -1,30 +1,30 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Modal from "@/app/components/ui/Modal";
 import { useToast } from "@/app/components/ui/ToastProvider";
 
-export default function AddFixtureDialog({
+export default function EditFixtureDialog({
+  fixture,
   open,
   onClose,
-  teamId,
-  onCreated,
+  onSaved,
 }: {
+  fixture: any;
   open: boolean;
   onClose: () => void;
-  teamId?: string;
-  onCreated?: () => void;
+  onSaved: () => void;
 }) {
   const toast = useToast();
-
   const [teams, setTeams] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const [form, setForm] = useState({
+    id: "",
     teamId: "",
-    type: "MATCH",
     opponent: "",
+    type: "MATCH",
     kit: "Pink",
     meetTime: "",
     date: "",
@@ -33,41 +33,55 @@ export default function AddFixtureDialog({
     notes: "",
   });
 
-  // Load teams
+  // Load teams + populate form
   useEffect(() => {
-    const loadTeams = async () => {
-      const res = await fetch("/api/teams");
-      const data = await res.json();
-      setTeams(data);
+    if (!fixture || !open) return;
 
-      // default select first team OR parent team
-      if (teamId) {
-        setForm((prev) => ({ ...prev, teamId }));
-      } else if (data.length > 0) {
-        setForm((prev) => ({ ...prev, teamId: data[0].id }));
-      }
+    const load = async () => {
+      const res = await fetch("/api/teams");
+      const t = await res.json();
+      setTeams(t);
+
+      const d = new Date(fixture.date);
+
+      setForm({
+        id: fixture.id, // 🔥 store the ID here
+        teamId: fixture.teamId || "",
+        opponent: fixture.opponent || "",
+        type: fixture.type || "MATCH",
+        kit: fixture.kit || "Pink",
+        meetTime: fixture.meetTime || "",
+        date: d.toISOString().slice(0, 10),
+        time: fixture.time || "",
+        location: fixture.location || "",
+        notes: fixture.notes || "",
+      });
     };
 
-    if (open) loadTeams();
-  }, [open, teamId]);
+    load();
+  }, [fixture, open]);
 
   const update = (key: string, value: string) => {
-    setForm({ ...form, [key]: value });
+    setForm((prev) => ({ ...prev, [key]: value }));
     setError("");
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSave = async (e: any) => {
     e.preventDefault();
+
+    if (!form.id) {
+      setError("Missing fixture id");
+      toast.error("Missing fixture id");
+      return;
+    }
+
     setLoading(true);
-    setError("");
 
     const combinedDateTime = new Date(`${form.date}T${form.time}`);
 
-    const res = await fetch("/api/sessions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+    const res = await fetch(`/api/sessions/${form.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         title: `vs ${form.opponent}`,
         opponent: form.opponent,
@@ -76,7 +90,7 @@ export default function AddFixtureDialog({
         date: combinedDateTime,
         time: form.time,
         kit: form.kit,
-        teamId: form.teamId, // 🔥 goes to selected team
+        teamId: form.teamId,
         meetTime: form.meetTime,
         notes: form.notes,
       }),
@@ -85,31 +99,18 @@ export default function AddFixtureDialog({
     setLoading(false);
 
     if (res.ok) {
-      toast.success("Fixture added successfully!");
-      onCreated?.();
-      onClose();
-
-      setForm({
-        teamId: teamId || "",
-        type: "MATCH",
-        opponent: "",
-        kit: "Pink",
-        meetTime: "",
-        date: "",
-        time: "",
-        location: "",
-        notes: "",
-      });
+      toast.success("Fixture updated");
+      onSaved();
     } else {
-      setError("Failed to add fixture");
-      toast.error("Failed to add fixture");
+      setError("Failed to update fixture");
+      toast.error("Update failed");
     }
   };
 
   return (
     <Modal open={open} onClose={onClose} size="md">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold">Add Fixture</h2>
+        <h2 className="text-xl font-bold">Edit Fixture</h2>
         <button
           onClick={onClose}
           className="text-zinc-400 hover:text-zinc-700 text-xl font-semibold"
@@ -124,15 +125,14 @@ export default function AddFixtureDialog({
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* TEAM SELECTOR */}
+      <form onSubmit={handleSave} className="space-y-4">
+        {/* TEAM */}
         <div>
           <label className="text-sm font-semibold">Team</label>
           <select
             className="w-full border rounded-lg p-2 mt-1"
             value={form.teamId}
             onChange={(e) => update("teamId", e.target.value)}
-            required
           >
             {teams.map((t) => (
               <option key={t.id} value={t.id}>
@@ -161,7 +161,6 @@ export default function AddFixtureDialog({
           <label className="text-sm font-semibold">Opponent</label>
           <input
             className="w-full border rounded-lg p-2 mt-1"
-            placeholder="e.g. City Girls FC"
             value={form.opponent}
             onChange={(e) => update("opponent", e.target.value)}
             required
@@ -187,7 +186,6 @@ export default function AddFixtureDialog({
           <label className="text-sm font-semibold">Meet Time</label>
           <input
             className="w-full border rounded-lg p-2 mt-1"
-            placeholder="9:30 AM"
             value={form.meetTime}
             onChange={(e) => update("meetTime", e.target.value)}
           />
@@ -223,7 +221,6 @@ export default function AddFixtureDialog({
           <label className="text-sm font-semibold">Location</label>
           <input
             className="w-full border rounded-lg p-2 mt-1"
-            placeholder="Venue address"
             value={form.location}
             onChange={(e) => update("location", e.target.value)}
             required
@@ -235,17 +232,17 @@ export default function AddFixtureDialog({
           <label className="text-sm font-semibold">Notes</label>
           <textarea
             className="w-full border rounded-lg p-2 mt-1"
-            placeholder="Any additional info..."
             value={form.notes}
             onChange={(e) => update("notes", e.target.value)}
           />
         </div>
 
+        {/* SAVE */}
         <div className="flex justify-end gap-3 pt-3">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-lg border hover:bg-gray-50 transition"
+            className="px-4 py-2 rounded-lg border"
           >
             Cancel
           </button>
@@ -253,9 +250,9 @@ export default function AddFixtureDialog({
           <button
             type="submit"
             disabled={loading}
-            className="px-5 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-lg font-semibold shadow transition"
+            className="px-5 py-2 bg-pink-500 text-white rounded-lg font-semibold"
           >
-            {loading ? "Saving..." : "Add Fixture"}
+            {loading ? "Saving..." : "Save Changes"}
           </button>
         </div>
       </form>

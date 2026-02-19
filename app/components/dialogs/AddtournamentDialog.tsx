@@ -217,7 +217,7 @@ export default function AddTournamentDialog({
             >
               <option>Pink</option>
               <option>Black</option>
-              <option>White</option>
+              <option>Training</option>
             </select>
           </div>
 

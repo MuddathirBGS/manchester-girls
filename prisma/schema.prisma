@@ -49,6 +49,8 @@ model Session {
   date      DateTime
   time      String
   kit       String?
+  meetTime  String?
+  notes     String?
   poster    String?
   teamId    String
 
@@ -56,6 +58,11 @@ model Session {
   teamScore     Int @default(0)
   opponentScore Int @default(0)
   status        String @default("UPCOMING") // UPCOMING | LIVE | FINISHED
+
+  // 🆕 POST-MATCH FEATURES
+  photoUrl      String?   // team photo for this fixture
+  coachPotmId   String?   // coach player of the match
+  parentPotmId  String?   // parent player of the match
 
   team        Team         @relation(fields: [teamId], references: [id])
   attendances Attendance[]
