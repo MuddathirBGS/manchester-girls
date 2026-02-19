@@ -1,29 +1,36 @@
+import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const teamId = searchParams.get("teamId") || undefined;
+  try {
+    const { searchParams } = new URL(req.url);
+    const teamId = searchParams.get("teamId") || undefined;
 
-  const sessions = await prisma.session.findMany({
-    where: teamId ? { teamId } : {},
-    orderBy: { date: "asc" },
-    include: {
-      attendances: true,
-      team: true,
+    const sessions = await prisma.session.findMany({
+      where: teamId ? { teamId } : {},
+      orderBy: { date: "asc" },
+      include: {
+        attendances: true,
+        team: true,
+        events: true,
+      },
+    });
 
-      // 🆕 include POTM player info (for display later)
-      events: true,
-    },
-  });
+    return NextResponse.json(sessions);
+  } catch (error: any) {
+    console.error("GET SESSIONS ERROR:", error);
 
-  return Response.json(sessions);
+    return NextResponse.json(
+      { error: error?.message || "Failed to fetch sessions" },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    // 1️⃣ Create the fixture/session
     const session = await prisma.session.create({
       data: {
         title: body.title,
@@ -34,8 +41,6 @@ export async function POST(req: Request) {
         time: body.time,
         kit: body.kit,
         teamId: body.teamId,
-
-        // 🆕 NEW FIELDS (safe defaults)
         meetTime: body.meetTime ?? null,
         notes: body.notes ?? null,
         poster: body.poster ?? null,
@@ -45,13 +50,11 @@ export async function POST(req: Request) {
       },
     });
 
-    // 2️⃣ Get all players from that team
     const players = await prisma.player.findMany({
       where: { teamId: body.teamId },
       select: { id: true },
     });
 
-    // 3️⃣ Auto-create attendance records
     if (players.length > 0) {
       await prisma.attendance.createMany({
         data: players.map((p) => ({
@@ -62,11 +65,12 @@ export async function POST(req: Request) {
       });
     }
 
-    return Response.json(session);
-  } catch (err) {
+    return NextResponse.json(session);
+  } catch (err: any) {
     console.error("SESSION CREATE ERROR:", err);
-    return Response.json(
-      { error: "Failed to create session" },
+
+    return NextResponse.json(
+      { error: err?.message || "Failed to create session" },
       { status: 500 }
     );
   }
