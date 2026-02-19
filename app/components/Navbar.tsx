@@ -12,121 +12,114 @@ export default function Navbar() {
   const isParent = pathname === "/";
 
   return (
-    <header className="w-full bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 py-3">
+    <header className="w-full bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-md">
 
-        {/* TOP ROW */}
-        <div className="flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-6">
 
-          {/* LEFT — LOGO + TITLE */}
-          <div className="flex items-center gap-3">
+        {/* MAIN ROW */}
+        <div className="flex items-center justify-between h-16">
+
+          {/* LEFT — CLUB */}
+          <div className="flex items-center gap-4">
             <img
               src="https://lightslategrey-lobster-819582.hostingersite.com/wp-content/uploads/2026/02/WhatsApp-Image-2026-02-04-at-11.51.29.jpeg"
-              className="w-10 h-10 rounded-full object-cover border-2 border-white"
+              className="w-10 h-10 rounded-full object-cover border-2 border-white/80"
             />
 
             <div className="leading-tight">
-              <div className="font-bold text-sm md:text-lg">
+              <div className="font-bold text-base tracking-wide">
                 Manchester Girls FC
               </div>
-              <div className="text-[10px] md:text-xs opacity-90">
-                the home of girls football
+              <div className="text-xs opacity-80">
+                Performance Hub
               </div>
             </div>
           </div>
 
           {/* DESKTOP NAV */}
-          <div className="hidden md:flex items-center gap-3">
+          <nav className="hidden md:flex items-center gap-8 text-sm font-semibold">
 
-            <Link href="/coach">
-              <div
-                className={`px-4 py-2 rounded-full font-semibold transition
-                ${isCoach
-                  ? "bg-white text-pink-600"
-                  : "bg-white/20 hover:bg-white/30"}`}
-              >
-                Coach
-              </div>
+            <Link
+              href="/coach"
+              className={`transition ${
+                isCoach
+                  ? "border-b-2 border-white pb-1"
+                  : "opacity-90 hover:opacity-100"
+              }`}
+            >
+              Coach
             </Link>
 
-            <Link href="/">
-              <div
-                className={`px-4 py-2 rounded-full font-semibold transition
-                ${isParent
-                  ? "bg-white text-pink-600"
-                  : "bg-white/20 hover:bg-white/30"}`}
-              >
-                Parent
-              </div>
+            <Link
+              href="/"
+              className={`transition ${
+                isParent
+                  ? "border-b-2 border-white pb-1"
+                  : "opacity-90 hover:opacity-100"
+              }`}
+            >
+              Parent
             </Link>
 
-            <button className="ml-4 bg-white text-pink-600 px-4 py-2 rounded-full font-semibold shadow hover:scale-105 transition">
+            <div className="w-px h-5 bg-white/40" />
+
+            <button className="bg-white text-pink-600 px-4 py-2 rounded-md font-semibold hover:scale-105 transition">
               Add
             </button>
 
-            <button className="bg-black/30 px-4 py-2 rounded-full font-semibold hover:bg-black/50 transition">
+            <button className="opacity-80 hover:opacity-100 transition">
               Logout
             </button>
-          </div>
+          </nav>
 
-          {/* HAMBURGER (MOBILE ONLY) */}
+          {/* MOBILE MENU BUTTON */}
           <button
-            className="md:hidden text-2xl font-bold"
+            className="md:hidden text-2xl"
             onClick={() => setOpen(!open)}
           >
             ☰
           </button>
         </div>
-
-        {/* MOBILE MENU */}
-        {open && (
-          <div className="md:hidden mt-4">
-            <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-3 space-y-2 shadow-2xl">
-
-              <Link href="/coach" onClick={() => setOpen(false)}>
-                <div
-                  className={`flex items-center justify-between px-4 py-3 rounded-xl font-semibold transition
-                  ${
-                    isCoach
-                      ? "bg-white text-pink-600 shadow"
-                      : "bg-white/5 hover:bg-white/15"
-                  }`}
-                >
-                  <span>Coach Dashboard</span>
-                  <span className="text-sm opacity-70">→</span>
-                </div>
-              </Link>
-
-              <Link href="/" onClick={() => setOpen(false)}>
-                <div
-                  className={`flex items-center justify-between px-4 py-3 rounded-xl font-semibold transition
-                  ${
-                    isParent
-                      ? "bg-white text-pink-600 shadow"
-                      : "bg-white/5 hover:bg-white/15"
-                  }`}
-                >
-                  <span>Parent View</span>
-                  <span className="text-sm opacity-70">→</span>
-                </div>
-              </Link>
-
-              <div className="border-t border-white/20 my-2" />
-
-              {/* <button className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-gradient-to-r from-pink-500 to-rose-600 font-semibold shadow hover:scale-[1.02] transition">
-                <span>Add Something</span>
-                <span>＋</span>
-              </button> */}
-
-              <button className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-black/40 font-semibold hover:bg-black/60 transition">
-                <span>Logout</span>
-                <span>⇥</span>
-              </button>
-
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* MOBILE DROPDOWN */}
+      {open && (
+        <div className="md:hidden bg-white text-black">
+          <div className="px-6 py-4 space-y-4">
+
+            <Link
+              href="/coach"
+              onClick={() => setOpen(false)}
+              className={`block font-semibold ${
+                isCoach ? "text-pink-600" : "text-zinc-700"
+              }`}
+            >
+              Coach Dashboard
+            </Link>
+
+            <Link
+              href="/"
+              onClick={() => setOpen(false)}
+              className={`block font-semibold ${
+                isParent ? "text-pink-600" : "text-zinc-700"
+              }`}
+            >
+              Parent View
+            </Link>
+
+            <div className="border-t pt-4" />
+
+            <button className="w-full bg-pink-600 text-white py-2 rounded-md font-semibold">
+              Add
+            </button>
+
+            <button className="w-full text-left text-zinc-600">
+              Logout
+            </button>
+
+          </div>
+        </div>
+      )}
     </header>
   );
 }

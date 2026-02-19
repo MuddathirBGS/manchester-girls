@@ -1,23 +1,34 @@
-import prisma from "@/lib/prisma";
-import TeamSelector from "./TeamSelector";
 import LiveStatsClient from "./LiveStatsClient";
 
 const DYNOS_ID = "cmlp8lhno00004lay76ixxb2n";
 const DIVAS_ID = "cmlp8lji200014lays2jfga30";
 
 async function getData(teamId: string) {
-  const players = await prisma.player.findMany({
-    where: { teamId },
-    include: { stats: true },
-    orderBy: { name: "asc" },
-  });
+  const base =
+    process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
-  const sessions = await prisma.session.findMany({
-    where: { teamId, type: { not: "TRAINING" } },
-    orderBy: { date: "asc" },
-  });
+  const [playersRes, sessionsRes] = await Promise.all([
+    fetch(`${base}/api/players?teamId=${teamId}`, {
+      cache: "no-store",
+    }),
+    fetch(`${base}/api/sessions?teamId=${teamId}`, {
+      cache: "no-store",
+    }),
+  ]);
 
-  return { players, sessions };
+  const players = await playersRes.json();
+  const sessions = await sessionsRes.json();
+
+  // Match FixturesPage logic
+  const filtered = sessions
+    .filter((s: any) => s.type !== "TRAINING")
+    .sort(
+      (a: any, b: any) =>
+        new Date(a.date).getTime() -
+        new Date(b.date).getTime()
+    );
+
+  return { players, sessions: filtered };
 }
 
 export default async function LiveStatsPage({
@@ -30,10 +41,12 @@ export default async function LiveStatsPage({
   const teamId = params.team || DYNOS_ID;
   const sessionId = params.session;
 
+  console.log("LIVE TEAM ID:", teamId);
+
   const { players, sessions } = await getData(teamId);
 
   const selectedSession =
-    sessions.find((s) => s.id === sessionId) || null;
+    sessions.find((s: any) => s.id === sessionId) || null;
 
   return (
     <LiveStatsClient

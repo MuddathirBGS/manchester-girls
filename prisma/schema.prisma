@@ -7,6 +7,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/* ================================
+   ENUMS
+================================= */
+
+enum SessionType {
+  TRAINING
+  MATCH
+}
+
+enum SessionStatus {
+  UPCOMING
+  LIVE
+  FINISHED
+}
+
+/* ================================
+   MODELS
+================================= */
+
 model Player {
   id        String  @id @default(cuid())
   name      String
@@ -44,7 +63,7 @@ model Session {
   id        String   @id @default(cuid())
   title     String
   opponent  String
-  type      String
+  type      SessionType
   location  String
   date      DateTime
   time      String
@@ -54,15 +73,15 @@ model Session {
   poster    String?
   teamId    String
 
-  // 🔥 LIVE MATCH DATA
-  teamScore     Int @default(0)
-  opponentScore Int @default(0)
-  status        String @default("UPCOMING") // UPCOMING | LIVE | FINISHED
+  // LIVE MATCH DATA
+  teamScore     Int           @default(0)
+  opponentScore Int           @default(0)
+  status        SessionStatus @default(UPCOMING)
 
-  // 🆕 POST-MATCH FEATURES
-  photoUrl      String?   // team photo for this fixture
-  coachPotmId   String?   // coach player of the match
-  parentPotmId  String?   // parent player of the match
+  // POST-MATCH FEATURES
+  photoUrl     String?
+  coachPotmId  String?
+  parentPotmId String?
 
   team        Team         @relation(fields: [teamId], references: [id])
   attendances Attendance[]
@@ -74,7 +93,7 @@ model MatchEvent {
   sessionId String
   playerId  String?
   type      String   // GOAL | ASSIST | SAVE | OPPONENT_GOAL
-  value     Int      @default(1) // +1 or -1
+  value     Int      @default(1)
   minute    Int?
   createdAt DateTime @default(now())
 

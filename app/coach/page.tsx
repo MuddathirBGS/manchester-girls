@@ -8,6 +8,7 @@ import AddPlayerDialog from "../components/dialogs/AddPlayerDialog";
 import AddFixtureDialog from "../components/dialogs/AddFixtureDialog";
 import AddTrainingDialog from "../components/dialogs/AddTrainingDialog";
 import AddtournamentDialog from "../components/dialogs/AddtournamentDialog";
+import CoachSubNav from "../components/CoachSubNav";
 
 export default function CoachPage() {
   const DYNOS_ID = "cmlp8lhno00004lay76ixxb2n";
@@ -97,39 +98,9 @@ export default function CoachPage() {
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-black">
             Coach Dashboard
           </h1>
+<CoachSubNav teamId={teamId} />
 
-          <div className="flex flex-wrap gap-2">
-            <Link href="/coach/live-stats">
-              <button className="px-4 py-2 bg-white border rounded-lg font-semibold shadow-sm hover:shadow transition">
-                ⚡ Live Stats
-              </button>
-            </Link>
-
-            <Link href="/coach/player-codes">
-              <button className="px-4 py-2 bg-white border rounded-lg font-semibold shadow-sm hover:shadow transition">
-                Player Codes
-              </button>
-            </Link>
-
-            <Link href="/attendance">
-              <button className="px-4 py-2 bg-white border rounded-lg font-semibold shadow-sm hover:shadow transition">
-                Attendance
-              </button>
-            </Link>
-
-            <Link href={`/coach/stats?teamId=${teamId}`}>
-              <button className="px-4 py-2 bg-white border rounded-lg font-semibold shadow-sm hover:shadow transition">
-                Statistics
-              </button>
-            </Link>
-
-           <Link href="/coach/manage-teams">
-  <button className="px-4 py-2 bg-white border rounded-lg font-semibold shadow-sm hover:shadow transition">
-    Team Roster
-  </button>
-</Link>
-
-          </div>
+          
         </div>
 
         {/* TEAM SELECTOR */}

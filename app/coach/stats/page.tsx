@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import Link from "next/link";
+import CoachSubNav from "@/app/components/CoachSubNav";
 
 const DYNOS_ID = "cmlp8lhno00004lay76ixxb2n";
 const DIVAS_ID = "cmlp8lji200014lays2jfga30";
@@ -14,30 +15,57 @@ export default async function StatsPage({
 
   const players = await prisma.player.findMany({
     where: { teamId },
-    include: { stats: true },
+    include: {
+      events: true, // 🔥 derive from match events
+    },
   });
 
-  const totalGoals = players.reduce(
-    (sum, p) => sum + (p.stats?.goals || 0),
+  /* ===========================
+     DERIVE PLAYER STATS
+  =========================== */
+
+  const playersWithStats = players.map((p) => {
+    const goals = p.events.filter(
+      (e) => e.type === "GOAL"
+    ).length;
+
+    const assists = p.events.filter(
+      (e) => e.type === "ASSIST"
+    ).length;
+
+    const saves = p.events.filter(
+      (e) => e.type === "SAVE"
+    ).length;
+
+    return {
+      ...p,
+      derived: { goals, assists, saves },
+    };
+  });
+
+  const totalGoals = playersWithStats.reduce(
+    (sum, p) => sum + p.derived.goals,
     0
   );
 
-  const totalAssists = players.reduce(
-    (sum, p) => sum + (p.stats?.assists || 0),
+  const totalAssists = playersWithStats.reduce(
+    (sum, p) => sum + p.derived.assists,
     0
   );
 
-  const totalSaves = players.reduce(
-    (sum, p) => sum + (p.stats?.saves || 0),
+  const totalSaves = playersWithStats.reduce(
+    (sum, p) => sum + p.derived.saves,
     0
   );
 
-  const topScorer = [...players].sort(
-    (a, b) => (b.stats?.goals || 0) - (a.stats?.goals || 0)
+  const topScorer = [...playersWithStats].sort(
+    (a, b) =>
+      b.derived.goals - a.derived.goals
   )[0];
 
-  const topSaver = [...players].sort(
-    (a, b) => (b.stats?.saves || 0) - (a.stats?.saves || 0)
+  const topSaver = [...playersWithStats].sort(
+    (a, b) =>
+      b.derived.saves - a.derived.saves
   )[0];
 
   const teamButton = (id: string) =>
@@ -60,14 +88,16 @@ export default async function StatsPage({
         </Link>
 
         {/* HEADER */}
-        <div>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-black">
-            Season Statistics
-          </h1>
-          <p className="text-sm text-zinc-500 mt-1">
-            Team performance overview
-          </p>
-        </div>
+      
+              {/* HEADER */}
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-10">
+                <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-black">
+                  Season Statistics
+                </h1>
+      <CoachSubNav teamId={teamId} />
+      
+                
+              </div>
 
         {/* TEAM SWITCH */}
         <div className="flex flex-wrap gap-3">
@@ -99,45 +129,23 @@ export default async function StatsPage({
 
         {/* STAT CARDS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-5">
-          <div className="bg-white rounded-2xl shadow-md border p-5 text-center">
-            <div className="text-sm text-zinc-500">Goals</div>
-            <div className="text-3xl font-extrabold text-pink-600">
-              {totalGoals}
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-md border p-5 text-center">
-            <div className="text-sm text-zinc-500">Assists</div>
-            <div className="text-3xl font-extrabold text-pink-600">
-              {totalAssists}
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-md border p-5 text-center">
-            <div className="text-sm text-zinc-500">Saves</div>
-            <div className="text-3xl font-extrabold text-pink-600">
-              {totalSaves}
-            </div>
-            <div className="text-xs text-zinc-400 mt-1">
-              {topSaver?.name} leads
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-md border p-5 text-center">
-            <div className="text-sm text-zinc-500">Coach POTM</div>
-            <div className="text-2xl font-bold text-black">—</div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-md border p-5 text-center">
-            <div className="text-sm text-zinc-500">Parents POTM</div>
-            <div className="text-2xl font-bold text-black">—</div>
-          </div>
+          <StatCard label="Goals" value={totalGoals} />
+          <StatCard label="Assists" value={totalAssists} />
+          <StatCard
+            label="Saves"
+            value={totalSaves}
+            sub={topSaver?.name + " leads"}
+          />
+          <StatCard label="Coach POTM" value="—" />
+          <StatCard label="Parents POTM" value="—" />
         </div>
 
         {/* PLAYER TABLE */}
         <div className="bg-white rounded-2xl shadow-md border overflow-hidden">
           <div className="p-5 border-b">
-            <h2 className="font-bold text-lg">Player Statistics</h2>
+            <h2 className="font-bold text-lg">
+              Player Statistics
+            </h2>
           </div>
 
           <div className="overflow-x-auto">
@@ -149,35 +157,57 @@ export default async function StatsPage({
                 <div>Saves</div>
               </div>
 
-              {players.map((p) => {
-                const s = p.stats;
-
-                return (
-                  <div
-                    key={p.id}
-                    className="grid grid-cols-4 px-5 py-3 border-t text-sm"
-                  >
-                    <div className="font-medium text-black">
-                      {p.name}
-                    </div>
-
-                    <div className="font-semibold text-pink-600">
-                      {s?.goals || 0}
-                    </div>
-
-                    <div>{s?.assists || 0}</div>
-
-                    <div className="font-semibold text-black">
-                      {s?.saves || 0}
-                    </div>
+              {playersWithStats.map((p) => (
+                <div
+                  key={p.id}
+                  className="grid grid-cols-4 px-5 py-3 border-t text-sm"
+                >
+                  <div className="font-medium text-black">
+                    {p.name}
                   </div>
-                );
-              })}
+
+                  <div className="font-semibold text-pink-600">
+                    {p.derived.goals}
+                  </div>
+
+                  <div>{p.derived.assists}</div>
+
+                  <div className="font-semibold text-black">
+                    {p.derived.saves}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
       </div>
+    </div>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  sub,
+}: {
+  label: string;
+  value: number | string;
+  sub?: string;
+}) {
+  return (
+    <div className="bg-white rounded-2xl shadow-md border p-5 text-center">
+      <div className="text-sm text-zinc-500">
+        {label}
+      </div>
+      <div className="text-3xl font-extrabold text-pink-600">
+        {value}
+      </div>
+      {sub && (
+        <div className="text-xs text-zinc-400 mt-1">
+          {sub}
+        </div>
+      )}
     </div>
   );
 }

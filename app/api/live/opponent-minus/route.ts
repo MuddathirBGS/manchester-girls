@@ -1,27 +1,57 @@
 import prisma from "@/lib/prisma";
 
 export async function POST(req: Request) {
-  const formData = await req.formData();
-  const sessionId = formData.get("sessionId") as string;
+  try {
+    const { sessionId } = await req.json();
 
-  if (!sessionId) {
-    return Response.json({ error: "Missing sessionId" }, { status: 400 });
+    if (!sessionId) {
+      return new Response(
+        JSON.stringify({ error: "Missing sessionId" }),
+        { status: 400 }
+      );
+    }
+
+    /* ===============================
+       1️⃣ SAFELY DECREMENT SCORE
+    =============================== */
+
+    const updated = await prisma.session.update({
+      where: { id: sessionId },
+      data: {
+        opponentScore: { decrement: 1 },
+      },
+    });
+
+    /* Prevent negative score */
+    if (updated.opponentScore < 0) {
+      await prisma.session.update({
+        where: { id: sessionId },
+        data: { opponentScore: 0 },
+      });
+    }
+
+    /* ===============================
+       2️⃣ CREATE MATCH EVENT
+    =============================== */
+
+    await prisma.matchEvent.create({
+      data: {
+        sessionId,
+        type: "OPPONENT_GOAL",
+        value: -1,
+      },
+    });
+
+    return new Response(
+      JSON.stringify({ success: true }),
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("OPPONENT MINUS ERROR:", error);
+
+    return new Response(
+      JSON.stringify({ error: "Server error" }),
+      { status: 500 }
+    );
   }
-
-  const session = await prisma.session.findUnique({
-    where: { id: sessionId },
-  });
-
-  if (!session) {
-    return Response.json({ error: "Session not found" }, { status: 404 });
-  }
-
-  await prisma.session.update({
-    where: { id: sessionId },
-    data: {
-      opponentScore: Math.max(0, session.opponentScore - 1),
-    },
-  });
-
-  return Response.json({ success: true });
 }

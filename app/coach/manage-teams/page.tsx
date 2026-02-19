@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import Link from "next/link";
+import CoachSubNav from "../../components/CoachSubNav";
 
 async function getTeams() {
   return prisma.team.findMany({
@@ -12,7 +13,7 @@ export default async function ManageTeamsPage() {
 
   return (
     <div className="min-h-screen bg-[#f7f1f4]">
-      {/* PAGE HEADER — matches Stats page */}
+      {/* PAGE HEADER */}
       <div className="max-w-6xl mx-auto px-6 pt-10 pb-4">
         <Link href="/coach">
           <div className="text-sm text-pink-600 mb-2 cursor-pointer hover:underline">
@@ -20,13 +21,21 @@ export default async function ManageTeamsPage() {
           </div>
         </Link>
 
-        <h1 className="text-4xl font-bold">Manage Teams</h1>
-        <p className="text-zinc-600 text-sm mt-1">
-          Create teams, manage players and share registration links
-        </p>
+       
+               {/* HEADER */}
+               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-10">
+                 <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-black">
+                   Coach Dashboard
+                 </h1>
+        {/* 🔥 SECONDARY NAV */}
+      <CoachSubNav />
+       
+                 
+               </div>
       </div>
 
       <div className="max-w-6xl mx-auto px-6 pb-10 space-y-8">
+
         {/* ACTION BUTTONS */}
         <div className="flex flex-wrap gap-3">
           <button className="px-5 py-3 bg-pink-500 hover:bg-pink-600 text-white rounded-xl font-semibold shadow-sm">
@@ -101,6 +110,7 @@ export default async function ManageTeamsPage() {
             </div>
           ))}
         </div>
+
       </div>
     </div>
   );
