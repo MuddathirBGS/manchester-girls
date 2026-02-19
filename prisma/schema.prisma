@@ -7,10 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/* ================================
-   ENUMS
-================================= */
-
 enum SessionType {
   TRAINING
   MATCH
@@ -21,10 +17,6 @@ enum SessionStatus {
   LIVE
   FINISHED
 }
-
-/* ================================
-   MODELS
-================================= */
 
 model Player {
   id        String  @id @default(cuid())
