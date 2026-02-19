@@ -4,8 +4,11 @@ const DYNOS_ID = "cmlp8lhno00004lay76ixxb2n";
 const DIVAS_ID = "cmlp8lji200014lays2jfga30";
 
 async function getData(teamId: string) {
+  // Automatically resolve correct domain (preview or production)
   const base =
-    process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3000";
 
   const [playersRes, sessionsRes] = await Promise.all([
     fetch(`${base}/api/players?teamId=${teamId}`, {
@@ -16,10 +19,13 @@ async function getData(teamId: string) {
     }),
   ]);
 
+  if (!playersRes.ok || !sessionsRes.ok) {
+    throw new Error("Failed to fetch live stats data");
+  }
+
   const players = await playersRes.json();
   const sessions = await sessionsRes.json();
 
-  // Match FixturesPage logic
   const filtered = sessions
     .filter((s: any) => s.type !== "TRAINING")
     .sort(
@@ -40,8 +46,6 @@ export default async function LiveStatsPage({
 
   const teamId = params.team || DYNOS_ID;
   const sessionId = params.session;
-
-  console.log("LIVE TEAM ID:", teamId);
 
   const { players, sessions } = await getData(teamId);
 
