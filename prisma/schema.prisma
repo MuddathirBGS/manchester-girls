@@ -8,8 +8,10 @@ datasource db {
 }
 
 enum SessionType {
-  TRAINING
   MATCH
+  FRIENDLY
+  TOURNAMENT
+  TRAINING
 }
 
 enum SessionStatus {
