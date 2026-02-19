@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import CoachSubNav from "../../components/CoachSubNav";
 
-const DYNOS_ID = "cmlp8lhno00004lay76ixxb2n";
-const DIVAS_ID = "cmlp8lji200014lays2jfga30";
+const DYNOS_ID = "cmltjiw8a0000396i44vrndkn";
+const DIVAS_ID = "cmltjixjz0001396i0ybecwvr";
 
 function generateCode() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();

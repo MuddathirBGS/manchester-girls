@@ -12,7 +12,7 @@ import CoachSubNav from "../components/CoachSubNav";
 
 export default function CoachPage() {
   const DYNOS_ID = "cmltjiw8a0000396i44vrndkn";
-  const DIVAS_ID = "cmltjixjz0001396i0ybecwvr";
+const DIVAS_ID = "cmltjixjz0001396i0ybecwvr";
 
   const [fixtures, setFixtures] = useState<any[]>([]);
   const [training, setTraining] = useState<any[]>([]);

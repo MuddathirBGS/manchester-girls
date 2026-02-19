@@ -1,7 +1,8 @@
 import LiveStatsClient from "./LiveStatsClient";
 
-const DYNOS_ID = "cmlp8lhno00004lay76ixxb2n";
-const DIVAS_ID = "cmlp8lji200014lays2jfga30";
+const DYNOS_ID = "cmltjiw8a0000396i44vrndkn";
+const DIVAS_ID = "cmltjixjz0001396i0ybecwvr";
+
 
 async function getData(teamId: string) {
   try {
