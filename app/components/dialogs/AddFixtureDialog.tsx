@@ -33,79 +33,112 @@ export default function AddFixtureDialog({
     notes: "",
   });
 
-  // Load teams
+  /* ===============================
+     LOAD TEAMS (ONLY WHEN OPENING)
+  =============================== */
   useEffect(() => {
-    const loadTeams = async () => {
-      const res = await fetch("/api/teams");
-      const data = await res.json();
-      setTeams(data);
+    if (!open) return;
 
-      // default select first team OR parent team
-      if (teamId) {
-        setForm((prev) => ({ ...prev, teamId }));
-      } else if (data.length > 0) {
-        setForm((prev) => ({ ...prev, teamId: data[0].id }));
+    const loadTeams = async () => {
+      try {
+        const res = await fetch("/api/teams");
+        const data = await res.json();
+        setTeams(data);
+
+        // Only set default if not already selected
+        setForm((prev) => {
+          if (prev.teamId) return prev;
+
+          if (teamId) {
+            return { ...prev, teamId };
+          }
+
+          if (data.length > 0) {
+            return { ...prev, teamId: data[0].id };
+          }
+
+          return prev;
+        });
+      } catch (err) {
+        console.error("LOAD TEAMS ERROR:", err);
       }
     };
 
-    if (open) loadTeams();
-  }, [open, teamId]);
+    loadTeams();
+  }, [open]);
 
+  /* ===============================
+     UPDATE FIELD
+  =============================== */
   const update = (key: string, value: string) => {
-    setForm({ ...form, [key]: value });
+    setForm((prev) => ({ ...prev, [key]: value }));
     setError("");
   };
 
+  /* ===============================
+     SUBMIT
+  =============================== */
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    const combinedDateTime = new Date(`${form.date}T${form.time}`);
+    try {
+      const combinedDateTime = new Date(`${form.date}T${form.time}`);
 
-    const res = await fetch("/api/sessions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title: `vs ${form.opponent}`,
-        opponent: form.opponent,
-        type: form.type,
-        location: form.location,
-        date: combinedDateTime,
-        time: form.time,
-        kit: form.kit,
-        teamId: form.teamId, // 🔥 goes to selected team
-        meetTime: form.meetTime,
-        notes: form.notes,
-      }),
-    });
-
-    setLoading(false);
-
-    if (res.ok) {
-      toast.success("Fixture added successfully!");
-      onCreated?.();
-      onClose();
-
-      setForm({
-        teamId: teamId || "",
-        type: "MATCH",
-        opponent: "",
-        kit: "Pink",
-        meetTime: "",
-        date: "",
-        time: "",
-        location: "",
-        notes: "",
+      const res = await fetch("/api/sessions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: `vs ${form.opponent}`,
+          opponent: form.opponent,
+          type: form.type,
+          location: form.location,
+          date: combinedDateTime,
+          time: form.time,
+          kit: form.kit,
+          teamId: form.teamId,
+          meetTime: form.meetTime,
+          notes: form.notes,
+        }),
       });
-    } else {
-      setError("Failed to add fixture");
-      toast.error("Failed to add fixture");
+
+      setLoading(false);
+
+      if (res.ok) {
+        toast.success("Fixture added successfully!");
+        onCreated?.();
+        onClose();
+
+        // Reset form but KEEP selected team
+        setForm((prev) => ({
+          ...prev,
+          type: "MATCH",
+          opponent: "",
+          kit: "Pink",
+          meetTime: "",
+          date: "",
+          time: "",
+          location: "",
+          notes: "",
+        }));
+      } else {
+        setError("Failed to add fixture");
+        toast.error("Failed to add fixture");
+      }
+    } catch (err) {
+      setLoading(false);
+      setError("Something went wrong");
+      toast.error("Something went wrong");
+      console.error("SUBMIT ERROR:", err);
     }
   };
 
+  /* ===============================
+     RENDER
+  =============================== */
   return (
     <Modal open={open} onClose={onClose} size="md">
       <div className="flex items-center justify-between mb-4">
@@ -125,6 +158,7 @@ export default function AddFixtureDialog({
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
+
         {/* TEAM SELECTOR */}
         <div>
           <label className="text-sm font-semibold">Team</label>
