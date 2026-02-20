@@ -103,17 +103,19 @@ export default function AddTrainingDialog({
 
   return (
     <Modal open={open} onClose={onClose} size="md">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold">Add Training</h2>
+     {/* HEADER */}
+<div className="flex items-center justify-between mb-6">
+  <h2 className="text-xl font-semibold text-pink-500">
+    Add Training
+  </h2>
 
-        <button
-          onClick={onClose}
-          className="text-zinc-400 hover:text-zinc-700 text-xl font-semibold"
-        >
-          ×
-        </button>
-      </div>
+  <button
+    onClick={onClose}
+    className="text-zinc-400 hover:text-zinc-700 text-xl font-semibold transition"
+  >
+    ×
+  </button>
+</div>
 
       {error && (
         <div className="mb-4 text-sm bg-red-100 text-red-700 px-3 py-2 rounded-lg">

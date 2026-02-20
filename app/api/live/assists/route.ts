@@ -1,23 +1,47 @@
 import prisma from "@/lib/prisma";
 
 export async function POST(req: Request) {
-  const form = await req.formData();
-  const playerId = form.get("playerId") as string;
+  try {
+    const { playerId, sessionId } = await req.json();
 
-  const stat = await prisma.stat.findUnique({
-    where: { playerId },
-  });
+    if (!playerId || !sessionId) {
+      return new Response(
+        JSON.stringify({ error: "Missing data" }),
+        { status: 400 }
+      );
+    }
 
-  if (stat) {
-    await prisma.stat.update({
+    /* 1️⃣ Create Match Event */
+    await prisma.matchEvent.create({
+      data: {
+        playerId,
+        sessionId,
+        type: "ASSIST",
+        value: 1,
+      },
+    });
+
+    /* 2️⃣ Update Stat Table */
+    await prisma.stat.upsert({
       where: { playerId },
-      data: { assists: { increment: 1 } },
+      update: { assists: { increment: 1 } },
+      create: {
+        playerId,
+        goals: 0,
+        assists: 1,
+        saves: 0,
+      },
     });
-  } else {
-    await prisma.stat.create({
-      data: { playerId, assists: 1 },
-    });
-  }
 
-  return Response.redirect("/coach/live-stats");
+    return new Response(
+      JSON.stringify({ success: true }),
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("ASSIST ERROR:", error);
+    return new Response(
+      JSON.stringify({ error: "Server error" }),
+      { status: 500 }
+    );
+  }
 }

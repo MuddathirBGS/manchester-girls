@@ -45,7 +45,6 @@ export default function AddParentDialog({
 
     if (res.ok) {
       toast.success("Parent added successfully!");
-
       onCreated?.();
       onClose();
 
@@ -63,34 +62,36 @@ export default function AddParentDialog({
 
   return (
     <Modal open={open} onClose={onClose} size="sm">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-pink-700">
-          Add Parent
-        </h2>
 
-        <button
-          onClick={onClose}
-          className="text-zinc-400 hover:text-zinc-700 text-xl font-semibold"
-        >
-          ×
-        </button>
-      </div>
+     {/* HEADER */}
+<div className="flex items-center justify-between mb-6">
+  <h2 className="text-xl font-semibold text-pink-500">
+    Add Parent
+  </h2>
+
+  <button
+    onClick={onClose}
+    className="text-zinc-400 hover:text-zinc-700 text-xl font-semibold transition"
+  >
+    ×
+  </button>
+</div>
 
       {error && (
-        <div className="mb-4 text-sm bg-red-100 text-red-700 px-3 py-2 rounded-lg">
+        <div className="mb-4 text-sm bg-pink-50 border border-pink-200 text-pink-700 px-3 py-2 rounded-lg">
           {error}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-5">
+
         {/* NAME */}
         <div>
           <label className="text-sm font-semibold text-zinc-700">
             Parent Name
           </label>
           <input
-            className="w-full border border-pink-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-200 rounded-lg p-2 mt-1 outline-none transition"
+            className="w-full border border-pink-200 rounded-lg p-2 mt-1 focus:outline-none focus:ring-2 focus:ring-pink-500 transition"
             placeholder="e.g. Sarah Johnson"
             value={form.name}
             onChange={(e) => update("name", e.target.value)}
@@ -105,7 +106,7 @@ export default function AddParentDialog({
           </label>
           <input
             type="email"
-            className="w-full border border-pink-200 focus:border-pink-400 focus:ring-2 focus:ring-pink-200 rounded-lg p-2 mt-1 outline-none transition"
+            className="w-full border border-pink-200 rounded-lg p-2 mt-1 focus:outline-none focus:ring-2 focus:ring-pink-500 transition"
             placeholder="parent@email.com"
             value={form.email}
             onChange={(e) => update("email", e.target.value)}
@@ -114,11 +115,11 @@ export default function AddParentDialog({
         </div>
 
         {/* BUTTONS */}
-        <div className="flex justify-end gap-3 pt-3">
+        <div className="flex justify-end gap-3 pt-4">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-lg border border-zinc-300 hover:bg-zinc-50 transition"
+            className="px-4 py-2 rounded-lg border border-pink-200 text-zinc-600 hover:bg-pink-50 transition"
           >
             Cancel
           </button>
@@ -126,11 +127,12 @@ export default function AddParentDialog({
           <button
             type="submit"
             disabled={loading}
-            className="px-5 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg font-semibold shadow transition"
+            className="px-5 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-lg font-semibold shadow-md transition disabled:opacity-50"
           >
             {loading ? "Saving..." : "Add Parent"}
           </button>
         </div>
+
       </form>
     </Modal>
   );

@@ -29,12 +29,13 @@ model Player {
   teamId    String?
   loginCode String?
 
+  photoUrl  String?
+
   parent Parent? @relation(fields: [parentId], references: [id])
   team   Team?   @relation(fields: [teamId], references: [id])
 
   attendances Attendance[]
   stats       Stat?
-
   awards      Award[]
   awardVotes  AwardVote[]
   coachAwards CoachAward[]

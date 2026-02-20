@@ -29,38 +29,16 @@ export default async function AttendancePage({
 
   type SessionWithAttendance = typeof sessions[number];
 
-  /* ================================
-     SPLIT SESSION TYPES
-     (MATCH COACH PAGE LOGIC EXACTLY)
-  ================================= */
+  const trainingSessions = sessions.filter((s) => s.type === "TRAINING");
+  const matchSessions = sessions.filter((s) => s.type !== "TRAINING");
 
-  const trainingSessions = sessions.filter(
-    (s) => s.type === "TRAINING"
-  );
-
-  const matchSessions = sessions.filter(
-    (s) => s.type !== "TRAINING"
-  );
-
-  /* ================================
-     RATE CALCULATION
-  ================================= */
-
-  const calculateRate = (
-    arr: SessionWithAttendance[]
-  ): number => {
+  const calculateRate = (arr: SessionWithAttendance[]): number => {
     let yes = 0;
     let total = 0;
 
     arr.forEach((s) => {
-      const y = s.attendances.filter(
-        (a) => a.status === "YES"
-      ).length;
-
-      const n = s.attendances.filter(
-        (a) => a.status === "NO"
-      ).length;
-
+      const y = s.attendances.filter((a) => a.status === "YES").length;
+      const n = s.attendances.filter((a) => a.status === "NO").length;
       yes += y;
       total += y + n;
     });
@@ -87,10 +65,6 @@ export default async function AttendancePage({
   const overallTrend = getTrend(sessions);
   const matchTrend = getTrend(matchSessions);
   const trainingTrend = getTrend(trainingSessions);
-
-  /* ================================
-     PLAYER ANALYTICS
-  ================================= */
 
   const playerStats: Record<
     string,
@@ -132,128 +106,115 @@ export default async function AttendancePage({
   const leaderboard = Object.values(playerStats)
     .map((p) => {
       const total =
-        p.matchYes +
-        p.matchNo +
-        p.trainingYes +
-        p.trainingNo;
+        p.matchYes + p.matchNo + p.trainingYes + p.trainingNo;
 
       const yes = p.matchYes + p.trainingYes;
 
-      const pct = total
-        ? Math.round((yes / total) * 100)
-        : 0;
+      const pct = total ? Math.round((yes / total) * 100) : 0;
 
       return { ...p, pct };
     })
     .sort((a, b) => b.pct - a.pct);
 
-  const lowAttendance = leaderboard.filter(
-    (p) => p.pct < 75
-  );
+  const lowAttendance = leaderboard.filter((p) => p.pct < 75);
 
   const matchOnlyPlayers = leaderboard.filter(
-    (p) =>
-      p.matchYes > 0 &&
-      p.trainingYes === 0
+    (p) => p.matchYes > 0 && p.trainingYes === 0
   );
 
   const trainingToMatchRatio =
     matchSessions.length > 0
-      ? (trainingSessions.length /
-          matchSessions.length).toFixed(2)
+      ? (trainingSessions.length / matchSessions.length).toFixed(2)
       : "0";
 
-  /* ================================
-     RENDER
-  ================================= */
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-pink-50 to-rose-100 p-6">
-      <div className="max-w-7xl mx-auto space-y-10">
+    <div className="min-h-screen bg-gradient-to-r from-pink-200 via-pink-100 to-white">
+      <div className="max-w-6xl mx-auto px-6 py-8">
 
-        <Link
-          href="/coach"
-          className="text-sm font-semibold text-pink-600"
-        >
-          ← Back
-        </Link>
+        {/* HEADER */}
+        <div className="mb-12">
+          <div className="flex flex-col gap-3">
+            <h1 className="font-heading text-4xl md:text-5xl font-semibold tracking-tight text-zinc-900">
+              Attendance Dashboard
+              <span className="block text-pink-500 text-lg font-medium mt-2">
+                Team Attendance Overview
+              </span>
+            </h1>
 
-         
-                 {/* HEADER */}
-                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-10">
-                   <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-black">
-                     Attendance Counts
-                   </h1>
-         <CoachSubNav teamId={teamId} />
-         
-                   
-                 </div>
+            <p className="text-base text-zinc-500 max-w-xl">
+              Track match and training attendance trends and participation.
+            </p>
+          </div>
 
-        {/* TEAM SWITCH */}
-        <div className="flex gap-3">
+          <div className="mt-8 border-t border-pink-200" />
+
+          <div className="mt-6">
+            <CoachSubNav teamId={teamId} />
+          </div>
+        </div>
+
+        {/* TEAM SELECTOR */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
           <Link href={`/attendance?team=${DYNOS_ID}`}>
-            <button
-              className={`px-4 py-2 rounded-lg font-semibold ${
+            <div
+              className={`cursor-pointer p-6 rounded-xl shadow-md border transition ${
                 teamId === DYNOS_ID
-                  ? "bg-pink-600 text-white"
-                  : "bg-zinc-200"
+                  ? "border-pink-500 ring-2 ring-pink-300 bg-white"
+                  : "bg-white border-pink-200"
               }`}
             >
-              Dynos (U9)
-            </button>
+              <div className="font-bold text-xl text-zinc-900">Dynos</div>
+              <div className="text-sm text-zinc-500">U9</div>
+            </div>
           </Link>
 
           <Link href={`/attendance?team=${DIVAS_ID}`}>
-            <button
-              className={`px-4 py-2 rounded-lg font-semibold ${
+            <div
+              className={`cursor-pointer p-6 rounded-xl shadow-md border transition ${
                 teamId === DIVAS_ID
-                  ? "bg-pink-600 text-white"
-                  : "bg-zinc-200"
+                  ? "border-pink-500 ring-2 ring-pink-300 bg-white"
+                  : "bg-white border-pink-200"
               }`}
             >
-              Divas (U9)
-            </button>
+              <div className="font-bold text-xl text-zinc-900">Divas</div>
+              <div className="text-sm text-zinc-500">U9</div>
+            </div>
           </Link>
         </div>
 
         {/* KPI GRID */}
-        <div className="grid md:grid-cols-6 gap-6">
-
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-5 mb-12">
           <KPI label="Overall %" value={`${overallRate}%`} trend={overallTrend} />
           <KPI label="Match %" value={`${matchRate}%`} trend={matchTrend} />
           <KPI label="Training %" value={`${trainingRate}%`} trend={trainingTrend} />
           <KPI label="Matches" value={`${matchSessions.length}`} />
           <KPI label="Training Sessions" value={`${trainingSessions.length}`} />
           <KPI label="Training:Match Ratio" value={`${trainingToMatchRatio}`} />
-
         </div>
 
-        {/* MATCH LIST */}
+        {/* MATCHES */}
         {matchSessions.length > 0 && (
           <Section title="Matches">
             {matchSessions.map((s) => (
-              <SessionCard key={s.id} session={s} />
+              <SessionCard key={s.id} session={s} type="match" />
             ))}
           </Section>
         )}
 
-        {/* TRAINING LIST */}
+        {/* TRAINING */}
         {trainingSessions.length > 0 && (
           <Section title="Training Sessions">
             {trainingSessions.map((s) => (
-              <SessionCard key={s.id} session={s} />
+              <SessionCard key={s.id} session={s} type="training" />
             ))}
           </Section>
         )}
-
       </div>
     </div>
   );
 }
 
-/* ================================
-   COMPONENTS
-================================= */
+/* COMPONENTS */
 
 function KPI({
   label,
@@ -265,11 +226,20 @@ function KPI({
   trend?: string;
 }) {
   return (
-    <div className="bg-white p-6 rounded-xl shadow">
-      <div className="text-sm text-zinc-500">{label}</div>
-      <div className="text-4xl font-bold mt-2">{value}</div>
+    <div className="bg-white border border-pink-200 rounded-xl p-5 shadow-md">
+      <div className="text-xs text-zinc-500">{label}</div>
+      <div className="text-3xl font-bold text-zinc-900 mt-2">{value}</div>
+
       {trend && (
-        <div className="text-sm mt-1">
+        <div
+          className={`text-sm mt-2 font-semibold ${
+            trend === "up"
+              ? "text-green-600"
+              : trend === "down"
+              ? "text-red-500"
+              : "text-zinc-500"
+          }`}
+        >
           {trend === "up"
             ? "↑ Improving"
             : trend === "down"
@@ -289,17 +259,23 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div>
-      <h2 className="text-xl font-bold mb-4">{title}</h2>
-      <div className="space-y-6">{children}</div>
+    <div className="mb-12">
+      <h2 className="text-xl font-bold text-zinc-900 mb-4">
+        {title}
+      </h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {children}
+      </div>
     </div>
   );
 }
 
 function SessionCard({
   session,
+  type,
 }: {
   session: any;
+  type: "match" | "training";
 }) {
   const yes = session.attendances.filter(
     (a: any) => a.status === "YES"
@@ -314,16 +290,31 @@ function SessionCard({
   ).length;
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow border">
-      <h3 className="font-bold">{session.title}</h3>
-      <p className="text-sm text-zinc-500">
-        {new Date(session.date).toLocaleDateString("en-GB")} • {session.location}
-      </p>
+    <div className="bg-white rounded-xl shadow-md border border-pink-200 overflow-hidden transition">
+      <div className={`h-2 ${type === "match" ? "bg-pink-500" : "bg-zinc-900"}`} />
 
-      <div className="flex gap-6 mt-3 text-sm font-semibold">
-        <div className="text-green-600">{yes} Attending</div>
-        <div className="text-red-500">{no} Not Attending</div>
-        <div className="text-zinc-500">{maybe} No Response</div>
+      <div className="p-5">
+        <h3 className={`font-semibold text-lg ${
+          type === "match" ? "text-pink-600" : "text-zinc-900"
+        }`}>
+          {session.title}
+        </h3>
+
+        <div className="text-sm text-zinc-600 mt-1">
+          📅 {new Date(session.date).toLocaleDateString("en-GB")}
+        </div>
+
+        {session.location && (
+          <div className="text-sm text-zinc-600">
+            📍 {session.location}
+          </div>
+        )}
+
+        <div className="flex gap-6 mt-4 text-sm font-semibold">
+          <div className="text-green-600">👥 {yes} Attending</div>
+          <div className="text-red-500">{no} Not Attending</div>
+          <div className="text-zinc-500">{maybe} No Response</div>
+        </div>
       </div>
     </div>
   );

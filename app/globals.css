@@ -148,3 +148,11 @@ body {
   font-weight: 600;
   background: transparent;
 }
+
+.font-heading {
+  font-family: var(--font-heading);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}

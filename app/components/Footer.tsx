@@ -6,8 +6,8 @@ import { Instagram } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="bg-white border-t border-zinc-200 mt-16">
-      <div className="max-w-6xl mx-auto px-4 md:px-8 py-12">
+    <footer className="bg-white border-t border-pink-200 mt-16">
+      <div className="max-w-6xl mx-auto px-6 py-12">
 
         {/* TOP */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
@@ -40,19 +40,19 @@ export default function Footer() {
             </h4>
 
             <div className="flex flex-col gap-3 text-sm">
-              <Link href="/coach" className="text-zinc-600 hover:text-pink-600 transition-colors">
+              <Link href="/coach" className="text-zinc-600 hover:text-pink-500 transition">
                 Coach Dashboard
               </Link>
 
-              <Link href="/" className="text-zinc-600 hover:text-pink-600 transition-colors">
+              <Link href="/" className="text-zinc-600 hover:text-pink-500 transition">
                 Parent Home
               </Link>
 
-              <Link href="/attendance" className="text-zinc-600 hover:text-pink-600 transition-colors">
+              <Link href="/attendance" className="text-zinc-600 hover:text-pink-500 transition">
                 Attendance
               </Link>
 
-              <Link href="/roster" className="text-zinc-600 hover:text-pink-600 transition-colors">
+              <Link href="/roster" className="text-zinc-600 hover:text-pink-500 transition">
                 Team Roster
               </Link>
             </div>
@@ -81,7 +81,7 @@ export default function Footer() {
               href="https://www.instagram.com/manchester_girls_fc?igsh=NjFodGdxazQ3dWd2"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 text-sm text-zinc-600 hover:text-pink-600 transition-colors"
+              className="flex items-center gap-3 text-sm text-zinc-600 hover:text-pink-500 transition"
             >
               <Instagram size={18} />
               <span>Instagram</span>
@@ -90,7 +90,7 @@ export default function Footer() {
         </div>
 
         {/* BOTTOM */}
-        <div className="border-t border-zinc-200 mt-10 pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
+        <div className="border-t border-pink-200 mt-10 pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
           <p>
             © {new Date().getFullYear()} Manchester Girls FC. All rights reserved.
           </p>

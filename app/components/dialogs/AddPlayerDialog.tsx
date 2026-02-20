@@ -22,6 +22,9 @@ export default function AddPlayerDialog({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const [image, setImage] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+
   const [form, setForm] = useState({
     name: "",
     number: "",
@@ -36,7 +39,6 @@ export default function AddPlayerDialog({
     email: "",
   });
 
-  // preload team
   useEffect(() => {
     if (teamId) {
       setForm((prev) => ({ ...prev, teamId }));
@@ -65,6 +67,13 @@ export default function AddPlayerDialog({
     setError("");
   };
 
+  const handleImageChange = (file: File | null) => {
+    if (!file) return;
+
+    setImage(file);
+    setPreview(URL.createObjectURL(file));
+  };
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
@@ -76,23 +85,43 @@ export default function AddPlayerDialog({
     setLoading(true);
     setError("");
 
-    const res = await fetch("/api/players", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: form.name,
-        number: Number(form.number) || null,
-        position: form.position || null,
-        teamId: form.teamId,
-        parentId: form.parentId,
-      }),
-    });
+    let photoUrl: string | null = null;
 
-    setLoading(false);
+    try {
+      // Upload image if exists
+      if (image) {
+        const formData = new FormData();
+        formData.append("file", image);
 
-    if (res.ok) {
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!uploadRes.ok) throw new Error("Upload failed");
+
+        const uploadData = await uploadRes.json();
+        photoUrl = uploadData.url;
+      }
+
+      // Create player
+      const res = await fetch("/api/players", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: form.name,
+          number: Number(form.number) || null,
+          position: form.position || null,
+          teamId: form.teamId,
+          parentId: form.parentId,
+          photoUrl,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Create failed");
+
       toast.success("Player added successfully!");
 
       onCreated?.();
@@ -105,10 +134,16 @@ export default function AddPlayerDialog({
         teamId: teamId || "",
         parentId: "",
       });
-    } else {
+
+      setImage(null);
+      setPreview(null);
+
+    } catch (err) {
       setError("Failed to add player");
       toast.error("Failed to add player");
     }
+
+    setLoading(false);
   };
 
   const handleAddParent = async () => {
@@ -128,7 +163,6 @@ export default function AddPlayerDialog({
       setForm((prev) => ({ ...prev, parentId: created.id }));
       setShowParentModal(false);
       setNewParent({ name: "", email: "" });
-
       toast.success("Parent added");
     } else {
       toast.error("Failed to add parent");
@@ -138,7 +172,6 @@ export default function AddPlayerDialog({
   return (
     <>
       <Modal open={open} onClose={onClose} size="md">
-        {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-2xl font-bold text-pink-600">
             Add Player
@@ -159,6 +192,34 @@ export default function AddPlayerDialog({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+
+          {/* IMAGE UPLOAD */}
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-24 h-24 rounded-full overflow-hidden bg-zinc-200 flex items-center justify-center text-2xl font-bold text-zinc-500">
+              {preview ? (
+                <img
+                  src={preview}
+                  alt="Preview"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                form.name?.charAt(0) || "?"
+              )}
+            </div>
+
+            <label className="text-sm text-pink-600 font-semibold cursor-pointer hover:underline">
+              Upload Profile Picture
+              <input
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={(e) =>
+                  handleImageChange(e.target.files?.[0] || null)
+                }
+              />
+            </label>
+          </div>
+
           <input
             className="w-full border rounded-lg p-2"
             placeholder="Player name"
@@ -243,7 +304,7 @@ export default function AddPlayerDialog({
         </form>
       </Modal>
 
-      {/* Nested Add Parent */}
+      {/* Parent Modal (unchanged) */}
       <Modal
         open={showParentModal}
         onClose={() => setShowParentModal(false)}

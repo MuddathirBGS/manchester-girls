@@ -33,9 +33,6 @@ export default function AddFixtureDialog({
     notes: "",
   });
 
-  /* ===============================
-     LOAD TEAMS (ONLY WHEN OPENING)
-  =============================== */
   useEffect(() => {
     if (!open) return;
 
@@ -45,13 +42,10 @@ export default function AddFixtureDialog({
         const data = await res.json();
         setTeams(data);
 
-        // Only set default if not already selected
         setForm((prev) => {
           if (prev.teamId) return prev;
 
-          if (teamId) {
-            return { ...prev, teamId };
-          }
+          if (teamId) return { ...prev, teamId };
 
           if (data.length > 0) {
             return { ...prev, teamId: data[0].id };
@@ -67,17 +61,11 @@ export default function AddFixtureDialog({
     loadTeams();
   }, [open]);
 
-  /* ===============================
-     UPDATE FIELD
-  =============================== */
   const update = (key: string, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
     setError("");
   };
 
-  /* ===============================
-     SUBMIT
-  =============================== */
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setLoading(true);
@@ -112,7 +100,6 @@ export default function AddFixtureDialog({
         onCreated?.();
         onClose();
 
-        // Reset form but KEEP selected team
         setForm((prev) => ({
           ...prev,
           type: "MATCH",
@@ -136,34 +123,35 @@ export default function AddFixtureDialog({
     }
   };
 
-  /* ===============================
-     RENDER
-  =============================== */
   return (
     <Modal open={open} onClose={onClose} size="md">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold">Add Fixture</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-semibold text-zinc-900">
+          Add Fixture
+        </h2>
         <button
           onClick={onClose}
-          className="text-zinc-400 hover:text-zinc-700 text-xl font-semibold"
+          className="text-zinc-400 hover:text-zinc-700 text-xl font-semibold transition"
         >
           ×
         </button>
       </div>
 
       {error && (
-        <div className="mb-4 text-sm bg-red-100 text-red-700 px-3 py-2 rounded-lg">
+        <div className="mb-4 text-sm bg-pink-50 border border-pink-200 text-pink-700 px-3 py-2 rounded-lg">
           {error}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
 
-        {/* TEAM SELECTOR */}
+        {/* TEAM */}
         <div>
-          <label className="text-sm font-semibold">Team</label>
+          <label className="text-sm font-semibold text-zinc-700">
+            Team
+          </label>
           <select
-            className="w-full border rounded-lg p-2 mt-1"
+            className="w-full border border-pink-200 rounded-lg p-2 mt-1 focus:outline-none focus:ring-2 focus:ring-pink-500"
             value={form.teamId}
             onChange={(e) => update("teamId", e.target.value)}
             required
@@ -178,9 +166,11 @@ export default function AddFixtureDialog({
 
         {/* TYPE */}
         <div>
-          <label className="text-sm font-semibold">Fixture Type</label>
+          <label className="text-sm font-semibold text-zinc-700">
+            Fixture Type
+          </label>
           <select
-            className="w-full border rounded-lg p-2 mt-1"
+            className="w-full border border-pink-200 rounded-lg p-2 mt-1 focus:outline-none focus:ring-2 focus:ring-pink-500"
             value={form.type}
             onChange={(e) => update("type", e.target.value)}
           >
@@ -192,9 +182,11 @@ export default function AddFixtureDialog({
 
         {/* OPPONENT */}
         <div>
-          <label className="text-sm font-semibold">Opponent</label>
+          <label className="text-sm font-semibold text-zinc-700">
+            Opponent
+          </label>
           <input
-            className="w-full border rounded-lg p-2 mt-1"
+            className="w-full border border-pink-200 rounded-lg p-2 mt-1 focus:outline-none focus:ring-2 focus:ring-pink-500"
             placeholder="e.g. City Girls FC"
             value={form.opponent}
             onChange={(e) => update("opponent", e.target.value)}
@@ -204,9 +196,11 @@ export default function AddFixtureDialog({
 
         {/* KIT */}
         <div>
-          <label className="text-sm font-semibold">Kit</label>
+          <label className="text-sm font-semibold text-zinc-700">
+            Kit
+          </label>
           <select
-            className="w-full border rounded-lg p-2 mt-1"
+            className="w-full border border-pink-200 rounded-lg p-2 mt-1 focus:outline-none focus:ring-2 focus:ring-pink-500"
             value={form.kit}
             onChange={(e) => update("kit", e.target.value)}
           >
@@ -218,9 +212,11 @@ export default function AddFixtureDialog({
 
         {/* MEET TIME */}
         <div>
-          <label className="text-sm font-semibold">Meet Time</label>
+          <label className="text-sm font-semibold text-zinc-700">
+            Meet Time
+          </label>
           <input
-            className="w-full border rounded-lg p-2 mt-1"
+            className="w-full border border-pink-200 rounded-lg p-2 mt-1 focus:outline-none focus:ring-2 focus:ring-pink-500"
             placeholder="9:30 AM"
             value={form.meetTime}
             onChange={(e) => update("meetTime", e.target.value)}
@@ -230,10 +226,12 @@ export default function AddFixtureDialog({
         {/* DATE + TIME */}
         <div className="flex gap-2">
           <div className="flex-1">
-            <label className="text-sm font-semibold">Date</label>
+            <label className="text-sm font-semibold text-zinc-700">
+              Date
+            </label>
             <input
               type="date"
-              className="w-full border rounded-lg p-2 mt-1"
+              className="w-full border border-pink-200 rounded-lg p-2 mt-1 focus:outline-none focus:ring-2 focus:ring-pink-500"
               value={form.date}
               onChange={(e) => update("date", e.target.value)}
               required
@@ -241,10 +239,12 @@ export default function AddFixtureDialog({
           </div>
 
           <div className="flex-1">
-            <label className="text-sm font-semibold">Kick-off Time</label>
+            <label className="text-sm font-semibold text-zinc-700">
+              Kick-off Time
+            </label>
             <input
               type="time"
-              className="w-full border rounded-lg p-2 mt-1"
+              className="w-full border border-pink-200 rounded-lg p-2 mt-1 focus:outline-none focus:ring-2 focus:ring-pink-500"
               value={form.time}
               onChange={(e) => update("time", e.target.value)}
               required
@@ -254,9 +254,11 @@ export default function AddFixtureDialog({
 
         {/* LOCATION */}
         <div>
-          <label className="text-sm font-semibold">Location</label>
+          <label className="text-sm font-semibold text-zinc-700">
+            Location
+          </label>
           <input
-            className="w-full border rounded-lg p-2 mt-1"
+            className="w-full border border-pink-200 rounded-lg p-2 mt-1 focus:outline-none focus:ring-2 focus:ring-pink-500"
             placeholder="Venue address"
             value={form.location}
             onChange={(e) => update("location", e.target.value)}
@@ -266,20 +268,23 @@ export default function AddFixtureDialog({
 
         {/* NOTES */}
         <div>
-          <label className="text-sm font-semibold">Notes</label>
+          <label className="text-sm font-semibold text-zinc-700">
+            Notes
+          </label>
           <textarea
-            className="w-full border rounded-lg p-2 mt-1"
+            className="w-full border border-pink-200 rounded-lg p-2 mt-1 focus:outline-none focus:ring-2 focus:ring-pink-500"
             placeholder="Any additional info..."
             value={form.notes}
             onChange={(e) => update("notes", e.target.value)}
           />
         </div>
 
-        <div className="flex justify-end gap-3 pt-3">
+        {/* ACTIONS */}
+        <div className="flex justify-end gap-3 pt-4">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-lg border hover:bg-gray-50 transition"
+            className="px-4 py-2 rounded-lg border border-pink-200 text-zinc-600 hover:bg-pink-50 transition"
           >
             Cancel
           </button>
@@ -287,11 +292,12 @@ export default function AddFixtureDialog({
           <button
             type="submit"
             disabled={loading}
-            className="px-5 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-lg font-semibold shadow transition"
+            className="px-5 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-lg font-semibold shadow-md transition disabled:opacity-50"
           >
             {loading ? "Saving..." : "Add Fixture"}
           </button>
         </div>
+
       </form>
     </Modal>
   );

@@ -1,40 +1,26 @@
+export const dynamic = "force-dynamic";
+
+import prisma from "@/lib/prisma";
 import LiveStatsClient from "./LiveStatsClient";
 
 const DYNOS_ID = "cmltjiw8a0000396i44vrndkn";
 const DIVAS_ID = "cmltjixjz0001396i0ybecwvr";
 
-
 async function getData(teamId: string) {
-  try {
-    const [playersRes, sessionsRes] = await Promise.all([
-      fetch(`/api/players?teamId=${teamId}`, {
-        cache: "no-store",
-      }),
-      fetch(`/api/sessions?teamId=${teamId}`, {
-        cache: "no-store",
-      }),
-    ]);
+  const players = await prisma.player.findMany({
+    where: { teamId },
+    orderBy: { name: "asc" },
+  });
 
-    const playersData = await playersRes.json();
-    const sessionsData = await sessionsRes.json();
+  const sessions = await prisma.session.findMany({
+    where: {
+      teamId,
+      type: { not: "TRAINING" },
+    },
+    orderBy: { date: "asc" },
+  });
 
-    // SAFETY: ensure arrays
-    const players = Array.isArray(playersData) ? playersData : [];
-    const sessions = Array.isArray(sessionsData) ? sessionsData : [];
-
-    const filtered = sessions
-      .filter((s: any) => s?.type !== "TRAINING")
-      .sort(
-        (a: any, b: any) =>
-          new Date(a?.date).getTime() -
-          new Date(b?.date).getTime()
-      );
-
-    return { players, sessions: filtered };
-  } catch (error) {
-    console.error("LIVE STATS GETDATA ERROR:", error);
-    return { players: [], sessions: [] };
-  }
+  return { players, sessions };
 }
 
 export default async function LiveStatsPage({
@@ -43,14 +29,13 @@ export default async function LiveStatsPage({
   searchParams: Promise<{ team?: string; session?: string }>;
 }) {
   const params = await searchParams;
-
   const teamId = params.team || DYNOS_ID;
   const sessionId = params.session;
 
   const { players, sessions } = await getData(teamId);
 
   const selectedSession =
-    sessions.find((s: any) => s?.id === sessionId) || null;
+    sessions.find((s) => s.id === sessionId) || null;
 
   return (
     <LiveStatsClient

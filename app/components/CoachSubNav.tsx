@@ -24,10 +24,14 @@ export default function CoachSubNav({
   ];
 
   return (
-    <div className="w-full flex justify-center mt-6 mb-2 px-3">
-      <div className="w-full max-w-6xl">
-        <div className="bg-white shadow-md border border-pink-100 rounded-2xl px-3 py-2 overflow-x-auto">
-          <div className="flex items-center gap-2 min-w-max">
+    <div className="w-full mt-6 mb-4">
+      <div className="max-w-6xl mx-auto px-2">
+
+        <div className="bg-white border border-pink-200 rounded-xl shadow-sm">
+
+          {/* MOBILE SCROLL CONTAINER */}
+          <div className="flex md:flex-wrap md:justify-center overflow-x-auto scrollbar-hide px-2 py-2 gap-2">
+
             {links.map((link) => {
               const active =
                 link.match === "/coach"
@@ -38,18 +42,20 @@ export default function CoachSubNav({
                 <Link
                   key={link.label}
                   href={link.href}
-                  className={`px-4 md:px-5 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200
+                  className={`flex-shrink-0 px-4 py-2 rounded-lg text-sm font-semibold transition whitespace-nowrap
                     ${
                       active
-                        ? "bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-md"
-                        : "text-zinc-600 hover:text-pink-600 hover:bg-pink-50"
+                        ? "bg-pink-500 text-white shadow-sm"
+                        : "text-zinc-600 hover:text-pink-500 hover:bg-pink-50"
                     }`}
                 >
                   {link.label}
                 </Link>
               );
             })}
+
           </div>
+
         </div>
       </div>
     </div>

@@ -12,7 +12,7 @@ export default function Navbar() {
   const isParent = pathname === "/";
 
   return (
-    <header className="w-full bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-md">
+    <header className="w-full bg-pink-500 text-white shadow-md">
 
       <div className="max-w-7xl mx-auto px-6">
 
@@ -63,7 +63,7 @@ export default function Navbar() {
 
             <div className="w-px h-5 bg-white/40" />
 
-            <button className="bg-white text-pink-600 px-4 py-2 rounded-md font-semibold hover:scale-105 transition">
+            <button className="bg-white text-pink-500 px-4 py-2 rounded-lg font-semibold hover:bg-pink-50 transition">
               Add
             </button>
 
@@ -84,14 +84,14 @@ export default function Navbar() {
 
       {/* MOBILE DROPDOWN */}
       {open && (
-        <div className="md:hidden bg-white text-black">
+        <div className="md:hidden bg-white text-zinc-900 border-t border-pink-200">
           <div className="px-6 py-4 space-y-4">
 
             <Link
               href="/coach"
               onClick={() => setOpen(false)}
               className={`block font-semibold ${
-                isCoach ? "text-pink-600" : "text-zinc-700"
+                isCoach ? "text-pink-500" : "text-zinc-700"
               }`}
             >
               Coach Dashboard
@@ -101,15 +101,15 @@ export default function Navbar() {
               href="/"
               onClick={() => setOpen(false)}
               className={`block font-semibold ${
-                isParent ? "text-pink-600" : "text-zinc-700"
+                isParent ? "text-pink-500" : "text-zinc-700"
               }`}
             >
               Parent View
             </Link>
 
-            <div className="border-t pt-4" />
+            <div className="border-t border-pink-200 pt-4" />
 
-            <button className="w-full bg-pink-600 text-white py-2 rounded-md font-semibold">
+            <button className="w-full bg-pink-500 hover:bg-pink-600 text-white py-2 rounded-lg font-semibold">
               Add
             </button>
 

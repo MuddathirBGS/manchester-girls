@@ -12,7 +12,7 @@ import CoachSubNav from "../components/CoachSubNav";
 
 export default function CoachPage() {
   const DYNOS_ID = "cmltjiw8a0000396i44vrndkn";
-const DIVAS_ID = "cmltjixjz0001396i0ybecwvr";
+  const DIVAS_ID = "cmltjixjz0001396i0ybecwvr";
 
   const [fixtures, setFixtures] = useState<any[]>([]);
   const [training, setTraining] = useState<any[]>([]);
@@ -44,7 +44,6 @@ const DIVAS_ID = "cmltjixjz0001396i0ybecwvr";
         setFixtures(f);
         setTraining(t);
 
-        // highlight newest fixture briefly
         if (f.length > 0) {
           setHighlighted(f[0].id);
           setTimeout(() => setHighlighted(null), 3500);
@@ -90,67 +89,90 @@ const DIVAS_ID = "cmltjixjz0001396i0ybecwvr";
   )[0];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-pink-50 to-rose-100 p-4 md:p-10">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-r from-pink-200 via-pink-100 to-white">
+      <div className="max-w-6xl mx-auto px-6 py-8">
 
-        {/* HEADER */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-10">
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-black">
-            Coach Dashboard
-          </h1>
-<CoachSubNav teamId={teamId} />
+      {/* HEADER */}
+<div className="mb-12">
 
-          
-        </div>
+  {/* TITLE BLOCK */}
+  <div className="flex flex-col gap-3">
+
+    <h1 className="font-heading text-4xl md:text-5xl font-semibold tracking-tight text-zinc-900">
+  Coach Dashboard
+  <span className="block text-pink-500 text-lg font-medium mt-2">
+    Team Management
+  </span>
+</h1>
+
+    <p className="text-base text-zinc-500 max-w-xl">
+      Manage sessions, players and team performance in one place.
+    </p>
+
+  </div>
+
+  {/* SOFT DIVIDER */}
+  <div className="mt-8 border-t border-pink-200" />
+
+  {/* SUB NAV */}
+  <div className="mt-6">
+    <CoachSubNav teamId={teamId} />
+  </div>
+
+</div>
 
         {/* TEAM SELECTOR */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
           <div
             onClick={() => setTeamId(DYNOS_ID)}
-            className={`cursor-pointer p-6 rounded-2xl shadow-md border transition-all ${
+            className={`cursor-pointer p-6 rounded-xl shadow-md border transition ${
               teamId === DYNOS_ID
-                ? "bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-lg"
-                : "bg-white hover:shadow-lg"
+                ? "border-pink-500 ring-2 ring-pink-300 bg-white"
+                : "bg-white border-pink-200"
             }`}
           >
-            <div className="font-bold text-xl">Dynos</div>
-            <div className="text-sm opacity-90">U9</div>
-            <div className="text-xs mt-2 opacity-80">Coach: Rick</div>
+            <div className="font-bold text-xl text-zinc-900">Dynos</div>
+            <div className="text-sm text-zinc-500">U9</div>
+            <div className="text-xs mt-2 text-zinc-500">Coach: Rick</div>
           </div>
 
           <div
             onClick={() => setTeamId(DIVAS_ID)}
-            className={`cursor-pointer p-6 rounded-2xl shadow-md border transition-all ${
+            className={`cursor-pointer p-6 rounded-xl shadow-md border transition ${
               teamId === DIVAS_ID
-                ? "bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-lg"
-                : "bg-white hover:shadow-lg"
+                ? "border-pink-500 ring-2 ring-pink-300 bg-white"
+                : "bg-white border-pink-200"
             }`}
           >
-            <div className="font-bold text-xl">Divas</div>
-            <div className="text-sm opacity-90">U9</div>
-            <div className="text-xs mt-2 opacity-80">Coach: Kristina</div>
+            <div className="font-bold text-xl text-zinc-900">Divas</div>
+            <div className="text-sm text-zinc-500">U9</div>
+            <div className="text-xs mt-2 text-zinc-500">
+              Coach: Kristina
+            </div>
           </div>
         </div>
 
         {/* TEAM AWARDS */}
         {teamPlayers.length > 0 && (
           <div className="mb-10 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white border rounded-xl p-5 shadow-md">
+            <div className="bg-white border border-pink-200 rounded-xl p-5 shadow-md">
               <div className="text-xs text-zinc-500">Player of Month</div>
               <div className="text-lg font-bold text-pink-600">
                 {playerOfMonth?.name || "—"}
               </div>
             </div>
 
-            <div className="bg-white border rounded-xl p-5 shadow-md">
+            <div className="bg-white border border-pink-200 rounded-xl p-5 shadow-md">
               <div className="text-xs text-zinc-500">Top Scorer</div>
               <div className="text-lg font-bold text-pink-600">
                 {goldenBoot?.name || "—"}
               </div>
             </div>
 
-            <div className="bg-white border rounded-xl p-5 shadow-md">
-              <div className="text-xs text-zinc-500">Trainee of the Week</div>
+            <div className="bg-white border border-pink-200 rounded-xl p-5 shadow-md">
+              <div className="text-xs text-zinc-500">
+                Trainee of the Week
+              </div>
               <div className="text-lg font-bold text-pink-600">
                 {coachLeader?.name || "—"}
               </div>
@@ -160,57 +182,61 @@ const DIVAS_ID = "cmltjixjz0001396i0ybecwvr";
 
         {/* ACTION BUTTONS */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-12">
-          <button onClick={() => setShowParent(true)} className="bg-gradient-to-r from-pink-500 to-pink-700 text-white p-4 rounded-xl shadow-md font-semibold hover:scale-105 hover:shadow-lg transition">
+          <button onClick={() => setShowParent(true)} className="bg-pink-500 hover:bg-pink-600 text-white px-6 py-2 rounded-lg font-semibold">
             Add Parent
           </button>
 
-          <button onClick={() => setShowPlayer(true)} className="bg-gradient-to-r from-pink-500 to-pink-700 text-white p-4 rounded-xl shadow-md font-semibold hover:scale-105 hover:shadow-lg transition">
+          <button onClick={() => setShowPlayer(true)} className="bg-pink-500 hover:bg-pink-600 text-white px-6 py-2 rounded-lg font-semibold">
             Add Player
           </button>
 
-          <button onClick={() => setShowFixture(true)} className="bg-gradient-to-r from-pink-500 to-pink-700 text-white p-4 rounded-xl shadow-md font-semibold hover:scale-105 hover:shadow-lg transition">
+          <button onClick={() => setShowFixture(true)} className="bg-pink-500 hover:bg-pink-600 text-white px-6 py-2 rounded-lg font-semibold">
             Add Fixture
           </button>
 
-          <button onClick={() => setShowTraining(true)} className="bg-gradient-to-r from-pink-500 to-pink-700 text-white p-4 rounded-xl shadow-md font-semibold hover:scale-105 hover:shadow-lg transition">
+          <button onClick={() => setShowTraining(true)} className="bg-pink-500 hover:bg-pink-600 text-white px-6 py-2 rounded-lg font-semibold">
             Add Training
           </button>
 
-          <button onClick={() => setShowTournament(true)} className="bg-gradient-to-r from-pink-500 to-pink-700 text-white p-4 rounded-xl shadow-md font-semibold hover:scale-105 hover:shadow-lg transition">
+          <button onClick={() => setShowTournament(true)} className="bg-pink-500 hover:bg-pink-600 text-white px-6 py-2 rounded-lg font-semibold">
             Add Tournament
           </button>
         </div>
 
         {/* FIXTURES */}
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-black">Upcoming Fixtures</h2>
-          <Link href="/fixtures" className="text-sm text-pink-600 font-semibold hover:underline">
+          <h2 className="text-xl font-bold text-zinc-900">
+            Upcoming Fixtures
+          </h2>
+          <Link href="/fixtures" className="text-sm text-pink-500 font-semibold">
             View All
           </Link>
         </div>
 
         {upcomingFixture.length === 0 && (
-          <p className="text-zinc-500 mb-8">No fixtures scheduled.</p>
+          <p className="text-zinc-500 mb-8">
+            No fixtures scheduled.
+          </p>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
           {upcomingFixture.map((s: any) => {
             const attending =
-              s.attendances?.filter((a: any) => a.status === "YES").length || 0;
+              s.attendances?.filter((a: any) => a.status === "YES")
+                .length || 0;
 
             const isNew = highlighted === s.id;
 
             return (
               <div
                 key={s.id}
-                className={`bg-white rounded-2xl border overflow-hidden transition-all
-                ${isNew ? "shadow-2xl ring-4 ring-pink-400 scale-[1.02]" : "shadow-md"}
-                hover:shadow-lg hover:-translate-y-1`}
+                className={`bg-white rounded-xl border border-pink-200 overflow-hidden transition
+                ${isNew ? "shadow-lg ring-2 ring-pink-300" : "shadow-md"}`}
               >
-                <div className="h-1 bg-gradient-to-r from-pink-600 to-rose-600" />
+                <div className="h-2 bg-pink-500" />
                 <div className="p-5">
                   <div className="flex justify-between items-center mb-3">
-                    <h3 className="font-semibold text-lg text-black">
+                    <h3 className="font-semibold text-lg text-pink-600">
                       {s.title}
                     </h3>
 
@@ -221,7 +247,7 @@ const DIVAS_ID = "cmltjixjz0001396i0ybecwvr";
                     )}
                   </div>
 
-                  <div className="text-sm text-zinc-700 mb-1">
+                  <div className="text-sm text-zinc-600 mb-1">
                     📅 {new Date(s.date).toLocaleDateString()} at {s.time}
                   </div>
 
@@ -248,8 +274,10 @@ const DIVAS_ID = "cmltjixjz0001396i0ybecwvr";
 
         {/* TRAINING */}
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-black">Upcoming Training</h2>
-          <Link href="/training" className="text-sm text-pink-600 font-semibold hover:underline">
+          <h2 className="text-xl font-bold text-zinc-900">
+            Upcoming Training
+          </h2>
+          <Link href="/training" className="text-sm text-pink-500 font-semibold">
             View All
           </Link>
         </div>
@@ -261,17 +289,21 @@ const DIVAS_ID = "cmltjixjz0001396i0ybecwvr";
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {upcomingTraining.map((t: any) => {
             const attending =
-              t.attendances?.filter((a: any) => a.status === "YES").length || 0;
+              t.attendances?.filter((a: any) => a.status === "YES")
+                .length || 0;
 
             return (
-              <div key={t.id} className="bg-white rounded-2xl shadow-md border hover:shadow-lg hover:-translate-y-1 transition overflow-hidden">
-                <div className="h-1 bg-gradient-to-r from-black to-black" />
+              <div
+                key={t.id}
+                className="bg-white rounded-xl shadow-md border border-zinc-200 overflow-hidden transition"
+              >
+                <div className="h-2 bg-zinc-900" />
                 <div className="p-5">
-                  <h3 className="font-semibold text-lg text-black mb-3">
+                  <h3 className="font-semibold text-lg text-zinc-900 mb-3">
                     {t.title}
                   </h3>
 
-                  <div className="text-sm text-zinc-700 mb-1">
+                  <div className="text-sm text-zinc-600 mb-1">
                     📅 {new Date(t.date).toLocaleDateString()} at {t.time}
                   </div>
 
