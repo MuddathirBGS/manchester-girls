@@ -13,7 +13,6 @@ export default async function ManageTeamsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-pink-200 via-pink-100 to-white">
-
       <div className="max-w-6xl mx-auto px-6 py-8 space-y-10">
 
         {/* HEADER */}
@@ -70,11 +69,12 @@ export default async function ManageTeamsPage() {
                     {team.name}
                   </div>
                   <div className="text-sm text-zinc-500">
-                    U9 Team
+                    Team Dashboard
                   </div>
                 </div>
 
-                <Link href={`/roster?teamId=${team.id}`}>
+                {/* 🔥 FIXED LINK */}
+                <Link href={`/roster/${team.id}`}>
                   <button className="px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white rounded-lg text-sm font-semibold transition">
                     View Players
                   </button>
@@ -84,7 +84,6 @@ export default async function ManageTeamsPage() {
               {/* LINKS BLOCK */}
               <div className="bg-pink-50 border border-pink-200 rounded-xl p-5 space-y-5">
 
-                {/* Parent link */}
                 <div>
                   <div className="text-sm font-semibold text-zinc-900">
                     Parent Registration Link
@@ -100,7 +99,6 @@ export default async function ManageTeamsPage() {
                   />
                 </div>
 
-                {/* Player login link */}
                 <div>
                   <div className="text-sm font-semibold text-zinc-900">
                     Player Chat Login Link
